@@ -57,15 +57,15 @@ impl Level {
     }
 }
 
-impl GroundKind {
-    pub fn load<'t, TL: TextureLoader<'t>>(
-        &self,
-        ground: &super::Ground,
-        texture_manager: &mut TextureManager<'t, TL>,
-    ) -> Result<Rc<TL::Texture>> {
-        match *self {
-            GroundKind::Top => ground.top.load(texture_manager),
-            GroundKind::Middle => ground.center.load(texture_manager),
-        }
-    }
-}
+// impl GroundKind {
+//     pub fn load<'t, TL: TextureLoader<'t>>(
+//         &self,
+//         ground: &super::Ground,
+//         texture_manager: &mut TextureManager<'t, TL>,
+//     ) -> Result<Rc<TL::Texture>> {
+//         match *self {
+//             GroundKind::Top => ground.top.load(texture_manager),
+//             GroundKind::Middle => ground.center.load(texture_manager),
+//         }
+//     }
+// }

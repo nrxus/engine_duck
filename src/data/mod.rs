@@ -3,15 +3,11 @@ mod level;
 pub use self::level::{CatKind, GroundKind, Level, Obstacle};
 
 use errors::*;
-use moho::animation::{self, animator, TileSheet};
-use moho::renderer::{self, TextureLoader, TextureManager};
 
 use glm;
 use serde_yaml;
 
 use std::fs::File;
-use std::rc::Rc;
-use std::time::Duration;
 
 #[derive(Debug, Deserialize, Clone, Copy)]
 pub struct Dimension {
@@ -27,35 +23,8 @@ pub struct Sprite {
     pub duration: u64,
 }
 
-impl Sprite {
-    pub fn load<'t, TL: TextureLoader<'t>>(
-        &self,
-        texture_manager: &mut TextureManager<'t, TL>,
-    ) -> Result<animation::Data<TL::Texture>>
-    where
-        TL::Texture: renderer::Texture,
-    {
-        let texture = self.texture.load(texture_manager)?;
-        let sheet = TileSheet::new(self.tiles.into(), texture);
-        let duration = Duration::from_millis(self.duration / u64::from(self.frames));
-        let animator = animator::Data::new(self.frames, duration);
-        Ok(animation::Data::new(animator, sheet))
-    }
-}
-
 #[derive(Debug, Deserialize, Clone)]
-pub struct Texture(String);
-
-impl Texture {
-    pub fn load<'t, TL: TextureLoader<'t>>(
-        &self,
-        texture_manager: &mut TextureManager<'t, TL>,
-    ) -> Result<Rc<TL::Texture>> {
-        texture_manager
-            .load(&format!("media/sprites/{}", self.0))
-            .map_err(Into::into)
-    }
-}
+pub struct Texture(pub String);
 
 #[derive(Debug, Deserialize, Clone)]
 pub enum Shape {

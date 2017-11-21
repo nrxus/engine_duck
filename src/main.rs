@@ -7,11 +7,15 @@ extern crate sdl2;
 extern crate serde_derive;
 extern crate serde_yaml;
 
+mod data;
+mod asset;
 mod level_viewer;
 mod game;
 
 use moho::engine::{step, Engine};
 use sdl2::image::{INIT_JPG, INIT_PNG};
+
+pub type RefSnapshot<'a, W> = step::Snapshot<&'a W, &'a step::fixed::State>;
 
 pub mod errors {
     error_chain!{
@@ -54,6 +58,7 @@ fn main() {
         .unwrap();
     let _image_ctx = sdl2::image::init(INIT_PNG | INIT_JPG).unwrap();
     let event_pump = sdl_ctx.event_pump().unwrap();
+    let texture_loader = canvas.texture_creator();
 
     //Setup Moho
     let step = step::FixedUpdate::default().rate(30);
@@ -63,7 +68,7 @@ fn main() {
     if level_viewer {
         level_viewer::run(&mut engine)
     } else {
-        //let font_loader = moho::renderer::sdl2::font::Loader::load(&creator).unwrap();
-        game::run(&mut engine)
+        let font_loader = moho::renderer::sdl2::font::Loader::load(&texture_loader).unwrap();
+        game::run(&mut engine, &texture_loader, &font_loader)
     }.unwrap()
 }
