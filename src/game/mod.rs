@@ -1,4 +1,7 @@
-use RefSnapshot;
+mod menu;
+mod font;
+
+use self::menu::Menu;
 use data;
 use errors::*;
 
@@ -10,9 +13,6 @@ use moho::renderer::{self, ColorRGBA, Font, FontLoader, Renderer, Texture, Textu
 use moho::renderer::font as moho_font;
 
 use std::time::Duration;
-
-mod menu;
-mod font;
 
 pub fn run<'t, 'f, E, C, FL, TL, T: Texture>(
     engine: &mut Engine<E, C, fixed::FixedUpdate>,
@@ -30,31 +30,30 @@ where
     let mut font_manager = moho_font::Manager::new(font_loader);
     let mut texture_manager = TextureManager::new(texture_loader);
     let data = data::Game::load("media/game_data.yaml")?;
-    let world = World {};
-    let scene = Assets::load(&mut font_manager, &mut texture_manager, &data)?;
+    let world = World::default();
+    let scene = Assets::load(&mut font_manager, &mut texture_manager, &data, &world)?;
     let helper = Helper {};
     engine
         .run::<Assets<C::Texture>, _, _>(world, scene, helper)
         .map_err(Into::into)
 }
 
-pub struct World {}
-
-impl World {
-    pub fn load() -> Result<Self> {
-        Ok(World {})
-    }
+#[derive(Default)]
+pub struct World {
+    menu: Menu,
 }
 
 impl engine::World for World {
     fn update(self, input: &input::State, elapsed: Duration) -> engine::State<Self> {
-        engine::State::Running(self)
+        self.menu.update(input, elapsed).map(|menu| World { menu })
     }
 }
 
-impl<T> NextScene<World, fixed::State, Helper> for Assets<T> {
-    fn next(self, _: RefSnapshot<World>, _: &mut Helper) -> moho::errors::Result<Self> {
-        Ok(self)
+impl<T: Texture> NextScene<World, fixed::State, Helper> for Assets<T> {
+    fn next(self, snapshot: ::RefSnapshot<World>, _: &mut Helper) -> moho::errors::Result<Self> {
+        self.menu
+            .next(snapshot.split(|w| &w.menu), &mut ())
+            .map(|menu| Assets { menu })
     }
 }
 
@@ -69,13 +68,14 @@ impl<T: Texture> Assets<T> {
         font_manager: &mut FM,
         texture_manager: &mut TextureManager<'t, TL>,
         data: &data::Game,
+        world: &World,
     ) -> Result<Self>
     where
         TL: TextureLoader<'t, Texture = T>,
         FM: font::Manager,
         FM::Font: Font<Texture = T>,
     {
-        let menu = menu::Assets::load(font_manager, texture_manager, data)?;
+        let menu = menu::Assets::load(font_manager, texture_manager, data, &world.menu)?;
         Ok(Assets { menu })
     }
 }

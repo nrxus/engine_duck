@@ -1,13 +1,37 @@
+use self::gui::Gui;
 use asset::{AssetLoader, Image};
 use data;
 use errors::*;
 use game::font;
 
-use moho;
+use moho::{self, input};
+use moho::engine::{self, NextScene, World};
+use moho::engine::step::fixed;
 use moho::renderer::{align, ColorRGBA, Font, Renderer, Scene, Texture, TextureLoader,
                      TextureManager};
+use sdl2::keyboard::Keycode;
 
 use std::rc::Rc;
+use std::time::Duration;
+
+#[derive(Default)]
+pub struct Menu {
+    gui: Gui,
+}
+
+impl World for Menu {
+    fn update(self, input: &input::State, elapsed: Duration) -> engine::State<Self> {
+        self.gui.update(input, elapsed).map(|gui| Menu { gui })
+    }
+}
+
+impl<T: Texture> NextScene<Menu, fixed::State, ()> for Assets<T> {
+    fn next(mut self, snapshot: ::RefSnapshot<Menu>, _: &mut ()) -> moho::errors::Result<Self> {
+        let snapshot = snapshot.split(|s| &s.gui);
+        self.gui = self.gui.next(snapshot, &mut ())?;
+        Ok(self)
+    }
+}
 
 pub struct Assets<T> {
     husky: Image<T>,
@@ -22,6 +46,7 @@ impl<T: Texture> Assets<T> {
         font_manager: &mut FM,
         texture_manager: &mut TextureManager<'t, TL>,
         data: &data::Game,
+        menu: &Menu,
     ) -> Result<Self>
     where
         TL: TextureLoader<'t, Texture = T>,
@@ -52,7 +77,7 @@ impl<T: Texture> Assets<T> {
         let gui = {
             let picker = texture_manager.load_texture(&data.heart.texture)?;
             let font = font_manager.load(font::Kind::KenPixel, 64)?;
-            gui::Assets::load(&*font, picker)
+            gui::Assets::load(&*font, picker, &menu.gui)
         }?;
 
         Ok(Assets {
@@ -78,16 +103,50 @@ where
     }
 }
 
-
 mod gui {
     use errors::*;
     use super::button;
 
     use glm;
-    use moho;
+    use moho::{self, input};
+    use moho::engine::step::fixed;
+    use moho::engine::{self, NextScene, World};
     use moho::renderer::{align, options, Font, Renderer, Scene, Texture};
+    use sdl2::keyboard::Keycode;
 
     use std::rc::Rc;
+    use std::time::Duration;
+
+    pub struct Gui {
+        selected: button::Kind,
+    }
+
+    impl Default for Gui {
+        fn default() -> Self {
+            Gui {
+                selected: button::Kind::NewGame,
+            }
+        }
+    }
+
+    impl World for Gui {
+        fn update(mut self, input: &input::State, _: Duration) -> engine::State<Self> {
+            if input.did_press_key(Keycode::Down) ^ input.did_press_key(Keycode::Up) {
+                self.selected = match self.selected {
+                    button::Kind::NewGame => button::Kind::HighScore,
+                    button::Kind::HighScore => button::Kind::NewGame,
+                }
+            }
+            engine::State::Running(self)
+        }
+    }
+
+    impl<T: Texture> NextScene<Gui, fixed::State, ()> for Assets<T> {
+        fn next(mut self, snapshot: ::RefSnapshot<Gui>, _: &mut ()) -> moho::errors::Result<Self> {
+            self.selected = snapshot.world.selected;
+            Ok(self)
+        }
+    }
 
     pub struct Assets<T> {
         selected: button::Kind,
@@ -97,7 +156,7 @@ mod gui {
     }
 
     impl<T> Assets<T> {
-        pub fn load<F>(font: &F, picker: Rc<T>) -> Result<Self>
+        pub fn load<F>(font: &F, picker: Rc<T>, gui: &Gui) -> Result<Self>
         where
             F: Font<Texture = T>,
         {
@@ -115,7 +174,7 @@ mod gui {
                 new_game,
                 high_score,
                 picker,
-                selected: button::Kind::NewGame,
+                selected: gui.selected,
             })
         }
     }
@@ -154,6 +213,7 @@ mod button {
 
     use std::rc::Rc;
 
+    #[derive(Clone, Copy)]
     pub enum Kind {
         NewGame,
         HighScore,
