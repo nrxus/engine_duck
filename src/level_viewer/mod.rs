@@ -23,8 +23,10 @@ where
 pub struct World {}
 
 impl engine::World for World {
-    fn update(self, _: &input::State, _: Duration) -> engine::State<Self> {
-        engine::State::Running(self)
+    type Quit = ();
+
+    fn update(self, _: &input::State, _: Duration) -> moho::State<Self, ()> {
+        moho::State::Running(self)
     }
 }
 

@@ -5,11 +5,10 @@ use errors::*;
 use game::font;
 
 use moho::{self, input};
-use moho::engine::{self, NextScene, World};
+use moho::engine::{NextScene, World};
 use moho::engine::step::fixed;
 use moho::renderer::{align, ColorRGBA, Font, Renderer, Scene, Texture, TextureLoader,
                      TextureManager};
-use sdl2::keyboard::Keycode;
 
 use std::rc::Rc;
 use std::time::Duration;
@@ -20,7 +19,9 @@ pub struct Menu {
 }
 
 impl World for Menu {
-    fn update(self, input: &input::State, elapsed: Duration) -> engine::State<Self> {
+    type Quit = ();
+
+    fn update(self, input: &input::State, elapsed: Duration) -> moho::State<Self, ()> {
         self.gui.update(input, elapsed).map(|gui| Menu { gui })
     }
 }
@@ -110,7 +111,7 @@ mod gui {
     use glm;
     use moho::{self, input};
     use moho::engine::step::fixed;
-    use moho::engine::{self, NextScene, World};
+    use moho::engine::{NextScene, World};
     use moho::renderer::{align, options, Font, Renderer, Scene, Texture};
     use sdl2::keyboard::Keycode;
 
@@ -130,14 +131,16 @@ mod gui {
     }
 
     impl World for Gui {
-        fn update(mut self, input: &input::State, _: Duration) -> engine::State<Self> {
+        type Quit = ();
+
+        fn update(mut self, input: &input::State, _: Duration) -> moho::State<Self, ()> {
             if input.did_press_key(Keycode::Down) ^ input.did_press_key(Keycode::Up) {
                 self.selected = match self.selected {
                     button::Kind::NewGame => button::Kind::HighScore,
                     button::Kind::HighScore => button::Kind::NewGame,
                 }
             }
-            engine::State::Running(self)
+            moho::State::Running(self)
         }
     }
 

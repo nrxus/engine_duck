@@ -44,7 +44,9 @@ pub struct World {
 }
 
 impl engine::World for World {
-    fn update(self, input: &input::State, elapsed: Duration) -> engine::State<Self> {
+    type Quit = ();
+
+    fn update(self, input: &input::State, elapsed: Duration) -> moho::State<Self, ()> {
         self.menu.update(input, elapsed).map(|menu| World { menu })
     }
 }
