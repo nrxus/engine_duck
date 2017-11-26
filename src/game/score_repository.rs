@@ -4,7 +4,7 @@ use serde_yaml;
 
 use std::fs::File;
 
-const PATH: &'static str = "media/high_scores.yaml";
+const PATH: &str = "media/high_scores.yaml";
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct ScoreEntry {

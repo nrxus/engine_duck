@@ -91,7 +91,7 @@ where
                 _ => menu::Assets::load(
                     &mut helper.font_manager,
                     &mut helper.texture_manager,
-                    &mut helper.data,
+                    &helper.data,
                     world,
                 ),
             }.map(Assets::Menu),

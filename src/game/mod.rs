@@ -46,7 +46,7 @@ where
     let scene = Assets::load(
         &mut helper.font_manager,
         &mut helper.texture_manager,
-        &mut helper.data,
+        &helper.data,
         &world,
     )?;
     engine
