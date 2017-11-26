@@ -1,5 +1,6 @@
 mod menu;
 mod high_score;
+mod player_select;
 mod font;
 mod screen;
 mod score_repository;

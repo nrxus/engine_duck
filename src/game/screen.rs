@@ -2,6 +2,7 @@ use data;
 use game::{font, Helper};
 use game::menu::{self, Menu};
 use game::high_score::{self, HighScore};
+use game::player_select::{self, PlayerSelect};
 
 use moho::{self, input};
 use moho::errors::*;
@@ -14,11 +15,13 @@ use std::time::Duration;
 pub enum Screen {
     Menu(Menu),
     HighScore(HighScore),
+    PlayerSelect(PlayerSelect),
 }
 
 pub enum Assets<T> {
     Menu(menu::Assets<T>),
     HighScore(high_score::Assets<T>),
+    PlayerSelect(player_select::Assets),
 }
 
 impl World for Screen {
@@ -28,13 +31,16 @@ impl World for Screen {
         match self {
             Screen::Menu(m) => m.update(input, elapsed).map(Screen::Menu).flat_map_quit(
                 |b| match b {
-                    menu::Quit::NewGame => moho::State::Quit(()),
+                    menu::Quit::NewGame => {
+                        moho::State::Running(Screen::PlayerSelect(PlayerSelect {}))
+                    }
                     menu::Quit::HighScore => moho::State::Running(Screen::HighScore(HighScore {})),
                 },
             ),
             Screen::HighScore(hs) => hs.update(input, elapsed)
                 .map(Screen::HighScore)
                 .flat_map_quit(|_| moho::State::Running(Screen::Menu(Menu::default()))),
+            Screen::PlayerSelect(ps) => moho::State::Running(Screen::PlayerSelect(ps)),
         }
     }
 }
@@ -56,6 +62,7 @@ impl<T: Texture> Assets<T> {
                 menu::Assets::load(font_manager, texture_manager, data, m).map(Assets::Menu)
             }
             Screen::HighScore(_) => high_score::Assets::load(font_manager).map(Assets::HighScore),
+            Screen::PlayerSelect(_) => player_select::Assets::load().map(Assets::PlayerSelect),
         }
     }
 }
@@ -92,6 +99,10 @@ where
                 Assets::HighScore(hs) => Ok(hs),
                 _ => high_score::Assets::load(&mut helper.font_manager),
             }.map(Assets::HighScore),
+            Screen::PlayerSelect(_) => match self {
+                Assets::PlayerSelect(ps) => Ok(Assets::PlayerSelect(ps)),
+                _ => player_select::Assets::load().map(Assets::PlayerSelect),
+            },
         }
     }
 }
@@ -104,6 +115,7 @@ where
         match *self {
             Assets::Menu(ref m) => renderer.show(m),
             Assets::HighScore(ref hs) => renderer.show(hs),
+            Assets::PlayerSelect(_) => Ok(()),
         }
     }
 }

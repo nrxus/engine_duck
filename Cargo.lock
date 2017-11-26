@@ -1,16 +1,3 @@
-[root]
-name = "engine_duck"
-version = "0.1.0"
-dependencies = [
- "error-chain 0.11.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "glm 0.2.3 (registry+https://github.com/rust-lang/crates.io-index)",
- "moho 0.0.10 (git+https://github.com/nrxus/moho)",
- "sdl2 0.31.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "serde 1.0.21 (registry+https://github.com/rust-lang/crates.io-index)",
- "serde_derive 1.0.21 (registry+https://github.com/rust-lang/crates.io-index)",
- "serde_yaml 0.7.2 (registry+https://github.com/rust-lang/crates.io-index)",
-]
-
 [[package]]
 name = "aho-corasick"
 version = "0.5.3"
@@ -64,6 +51,19 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
  "winapi 0.2.8 (registry+https://github.com/rust-lang/crates.io-index)",
  "winapi-build 0.1.1 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
+name = "engine_duck"
+version = "0.1.0"
+dependencies = [
+ "error-chain 0.11.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "glm 0.2.3 (registry+https://github.com/rust-lang/crates.io-index)",
+ "moho 0.0.10 (git+https://github.com/nrxus/moho)",
+ "sdl2 0.31.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "serde 1.0.21 (registry+https://github.com/rust-lang/crates.io-index)",
+ "serde_derive 1.0.21 (registry+https://github.com/rust-lang/crates.io-index)",
+ "serde_yaml 0.7.2 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
