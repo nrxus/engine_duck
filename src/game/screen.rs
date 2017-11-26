@@ -86,11 +86,11 @@ where
                     &mut helper.texture_manager,
                     &mut helper.data,
                     world,
-                ).map_err(Into::into),
+                ),
             }.map(Assets::Menu),
             Screen::HighScore(_) => match self {
                 Assets::HighScore(hs) => Ok(hs),
-                _ => high_score::Assets::load(&mut helper.font_manager).map_err(Into::into),
+                _ => high_score::Assets::load(&mut helper.font_manager),
             }.map(Assets::HighScore),
         }
     }

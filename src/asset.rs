@@ -42,7 +42,6 @@ where
 {
     fn load_texture(&mut self, texture: &data::Texture) -> Result<Rc<TL::Texture>> {
         self.load(&format!("media/sprites/{}", texture.0))
-            .map_err(Into::into)
     }
 
     fn load_image(

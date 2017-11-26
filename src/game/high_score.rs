@@ -48,7 +48,7 @@ impl<T: Texture> Assets<T> {
             let text = "<PRESS ENTER TO GO TO MAIN MENU>";
             let texture = font_manager
                 .load(font::Kind::KenPixel, 32)
-                .and_then(|f| f.texturize(text, &color).map_err(Into::into))
+                .and_then(|f| f.texturize(text, &color))
                 .map(Rc::new)?;
             let dims = texture.dims();
             let dst = center.bottom(720 - dims.y as i32).dims(dims);
