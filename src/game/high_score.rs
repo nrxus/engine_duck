@@ -54,10 +54,27 @@ impl<T: Texture> Assets<T> {
             let dst = center.bottom(720 - dims.y as i32).dims(dims);
             Image { texture, dst }
         };
+
+        let scores = {
+            let font = font_manager.load(font::Kind::Joystix, 32)?;
+            let color = ColorRGBA(255, 255, 255, 255);
+            let scores: Vec<_> = super::score_repository::get();
+
+            let mut top = 150;
+            let mut vec = Vec::with_capacity(scores.len());
+            for s in scores {
+                let score = format!("{:06}{:5}{:>6}", s.score, "", s.name);
+                let image = font.image(&score, &color, center.top(top))?;
+                top += image.dst.dims.y as i32;
+                vec.push(image);
+            }
+            vec
+        };
+
         Ok(Assets {
             title,
             instructions,
-            scores: vec![],
+            scores,
         })
     }
 }

@@ -2,6 +2,7 @@ mod menu;
 mod high_score;
 mod font;
 mod screen;
+mod score_repository;
 
 use self::screen::Screen;
 use self::menu::Menu;
