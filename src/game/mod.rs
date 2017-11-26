@@ -1,6 +1,9 @@
 mod menu;
+mod high_score;
 mod font;
+mod screen;
 
+use self::screen::Screen;
 use self::menu::Menu;
 use data;
 use errors::*;
@@ -27,42 +30,68 @@ where
     FL::Font: Font<Texture = T>,
     TL: TextureLoader<'t, Texture = T>,
 {
-    let mut font_manager = moho_font::Manager::new(font_loader);
-    let mut texture_manager = TextureManager::new(texture_loader);
+    let font_manager = moho_font::Manager::new(font_loader);
+    let texture_manager = TextureManager::new(texture_loader);
     let data = data::Game::load("media/game_data.yaml")?;
-    let world = World::default();
-    let scene = Assets::load(&mut font_manager, &mut texture_manager, &data, &world)?;
-    let helper = Helper {};
+    let world = World {
+        screen: Screen::Menu(Menu::default()),
+    };
+    let mut helper = Helper {
+        font_manager,
+        texture_manager,
+        data,
+    };
+    let scene = Assets::load(
+        &mut helper.font_manager,
+        &mut helper.texture_manager,
+        &mut helper.data,
+        &world,
+    )?;
     engine
         .run::<Assets<C::Texture>, _, _>(world, scene, helper)
         .map_err(Into::into)
 }
 
-#[derive(Default)]
 pub struct World {
-    menu: Menu,
+    screen: Screen,
 }
 
 impl engine::World for World {
     type Quit = ();
 
     fn update(self, input: &input::State, elapsed: Duration) -> moho::State<Self, ()> {
-        self.menu.update(input, elapsed).map(|menu| World { menu })
+        self.screen
+            .update(input, elapsed)
+            .map(|screen| World { screen })
     }
 }
 
-impl<T: Texture> NextScene<World, fixed::State, Helper> for Assets<T> {
-    fn next(self, snapshot: ::RefSnapshot<World>, _: &mut Helper) -> moho::errors::Result<Self> {
-        self.menu
-            .next(snapshot.split(|w| &w.menu), &mut ())
-            .map(|menu| Assets { menu })
+impl<'t, FM, TL> NextScene<World, fixed::State, Helper<'t, FM, TL>> for Assets<TL::Texture>
+where
+    TL: TextureLoader<'t>,
+    TL::Texture: Texture,
+    FM: font::Manager,
+    FM::Font: Font<Texture = TL::Texture>,
+{
+    fn next(
+        self,
+        snapshot: ::RefSnapshot<World>,
+        helper: &mut Helper<'t, FM, TL>,
+    ) -> moho::errors::Result<Self> {
+        self.screen
+            .next(snapshot.split(|w| &w.screen), helper)
+            .map(|screen| Assets { screen })
     }
 }
 
-pub struct Helper {}
+pub struct Helper<'t, FM, TL: 't + TextureLoader<'t>> {
+    font_manager: FM,
+    texture_manager: TextureManager<'t, TL>,
+    data: data::Game,
+}
 
 pub struct Assets<T> {
-    menu: menu::Assets<T>,
+    screen: screen::Assets<T>,
 }
 
 impl<T: Texture> Assets<T> {
@@ -71,14 +100,14 @@ impl<T: Texture> Assets<T> {
         texture_manager: &mut TextureManager<'t, TL>,
         data: &data::Game,
         world: &World,
-    ) -> Result<Self>
+    ) -> moho::errors::Result<Self>
     where
         TL: TextureLoader<'t, Texture = T>,
         FM: font::Manager,
         FM::Font: Font<Texture = T>,
     {
-        let menu = menu::Assets::load(font_manager, texture_manager, data, &world.menu)?;
-        Ok(Assets { menu })
+        screen::Assets::load(font_manager, texture_manager, data, &world.screen)
+            .map(|screen| Assets { screen })
     }
 }
 
@@ -87,7 +116,7 @@ where
     R::Texture: Texture,
 {
     fn show(&self, renderer: &mut R) -> moho::errors::Result<()> {
-        renderer.show(&self.menu)?;
+        renderer.show(&self.screen)?;
         //reset to the background color
         let color = ColorRGBA(60, 0, 70, 255);
         renderer.set_draw_color(color);

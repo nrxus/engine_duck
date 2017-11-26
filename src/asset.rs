@@ -1,9 +1,8 @@
 use data;
-use errors::*;
 
 use glm;
-use moho;
 use moho::animation::{self, animator, TileSheet};
+use moho::errors::*;
 use moho::renderer::{options, Renderer, Scene, Texture, TextureLoader, TextureManager};
 
 use std::rc::Rc;
@@ -83,7 +82,7 @@ impl<'t, R: Renderer<'t>> Scene<R> for Image<R::Texture>
 where
     R::Texture: Texture,
 {
-    fn show(&self, renderer: &mut R) -> moho::errors::Result<()> {
+    fn show(&self, renderer: &mut R) -> Result<()> {
         renderer.copy(&*self.texture, options::at(self.dst))
     }
 }

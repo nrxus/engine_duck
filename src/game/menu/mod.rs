@@ -1,12 +1,13 @@
 mod gui;
 
+pub use self::gui::Quit;
 use self::gui::Gui;
 use asset::{AssetLoader, Image};
 use data;
-use errors::*;
 use game::font;
 
 use moho::{self, input};
+use moho::errors::*;
 use moho::engine::{NextScene, World};
 use moho::engine::step::fixed;
 use moho::renderer::{align, ColorRGBA, Font, Renderer, Scene, Texture, TextureLoader,
@@ -21,15 +22,15 @@ pub struct Menu {
 }
 
 impl World for Menu {
-    type Quit = ();
+    type Quit = Quit;
 
-    fn update(self, input: &input::State, elapsed: Duration) -> moho::State<Self, ()> {
+    fn update(self, input: &input::State, elapsed: Duration) -> moho::State<Self, Self::Quit> {
         self.gui.update(input, elapsed).map(|gui| Menu { gui })
     }
 }
 
 impl<T: Texture> NextScene<Menu, fixed::State, ()> for Assets<T> {
-    fn next(mut self, snapshot: ::RefSnapshot<Menu>, _: &mut ()) -> moho::errors::Result<Self> {
+    fn next(mut self, snapshot: ::RefSnapshot<Menu>, _: &mut ()) -> Result<Self> {
         let snapshot = snapshot.split(|s| &s.gui);
         self.gui = self.gui.next(snapshot, &mut ())?;
         Ok(self)
@@ -97,7 +98,7 @@ impl<'t, R: Renderer<'t>> Scene<R> for Assets<R::Texture>
 where
     R::Texture: Texture,
 {
-    fn show(&self, renderer: &mut R) -> moho::errors::Result<()> {
+    fn show(&self, renderer: &mut R) -> Result<()> {
         renderer.show(&self.husky)?;
         renderer.show(&self.duck)?;
         renderer.show(&self.heart)?;

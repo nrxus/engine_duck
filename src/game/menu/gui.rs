@@ -1,6 +1,5 @@
-use errors::*;
-
 use glm;
+use moho::errors::*;
 use moho::{self, input};
 use moho::engine::step::fixed;
 use moho::engine::{NextScene, World};
@@ -9,6 +8,8 @@ use sdl2::keyboard::Keycode;
 
 use std::rc::Rc;
 use std::time::Duration;
+
+pub use self::button::Kind as Quit;
 
 pub struct Gui {
     selected: button::Kind,
@@ -23,21 +24,25 @@ impl Default for Gui {
 }
 
 impl World for Gui {
-    type Quit = ();
+    type Quit = Quit;
 
-    fn update(mut self, input: &input::State, _: Duration) -> moho::State<Self, ()> {
+    fn update(mut self, input: &input::State, _: Duration) -> moho::State<Self, Quit> {
         if input.did_press_key(Keycode::Down) ^ input.did_press_key(Keycode::Up) {
             self.selected = match self.selected {
                 button::Kind::NewGame => button::Kind::HighScore,
                 button::Kind::HighScore => button::Kind::NewGame,
             }
         }
-        moho::State::Running(self)
+        if input.did_press_key(Keycode::Return) {
+            moho::State::Quit(self.selected)
+        } else {
+            moho::State::Running(self)
+        }
     }
 }
 
 impl<T: Texture> NextScene<Gui, fixed::State, ()> for Assets<T> {
-    fn next(mut self, snapshot: ::RefSnapshot<Gui>, _: &mut ()) -> moho::errors::Result<Self> {
+    fn next(mut self, snapshot: ::RefSnapshot<Gui>, _: &mut ()) -> Result<Self> {
         self.selected = snapshot.world.selected;
         Ok(self)
     }
@@ -78,7 +83,7 @@ impl<'t, R: Renderer<'t>> Scene<R> for Assets<R::Texture>
 where
     R::Texture: Texture,
 {
-    fn show(&self, renderer: &mut R) -> moho::errors::Result<()> {
+    fn show(&self, renderer: &mut R) -> Result<()> {
         let (selected, unselected) = match self.selected {
             button::Kind::HighScore => (&self.high_score, &self.new_game),
             button::Kind::NewGame => (&self.new_game, &self.high_score),
@@ -100,9 +105,8 @@ where
 }
 
 mod button {
-    use errors::*;
-
     use glm;
+    use moho::errors::*;
     use moho::renderer::{align, options, ColorRGBA, Font};
 
     use std::rc::Rc;

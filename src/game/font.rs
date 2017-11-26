@@ -1,5 +1,4 @@
-use errors::*;
-
+use moho::errors::*;
 use moho::renderer::font;
 use moho::renderer::FontLoader;
 
