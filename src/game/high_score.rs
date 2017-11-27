@@ -86,10 +86,7 @@ where
     fn show(&self, renderer: &mut R) -> Result<()> {
         renderer.show(&self.title)?;
         renderer.show(&self.instructions)?;
-        for s in &self.scores {
-            renderer.show(s)?;
-        }
-        Ok(())
+        self.scores.iter().map(|s| renderer.show(s)).collect()
     }
 }
 
