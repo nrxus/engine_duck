@@ -1,3 +1,4 @@
+use asset;
 use data;
 use game::{font, Helper};
 use game::menu::{self, Menu};
@@ -8,7 +9,7 @@ use moho::{self, input};
 use moho::errors::*;
 use moho::engine::{NextScene, World};
 use moho::engine::step::fixed;
-use moho::renderer::{Font, Renderer, Scene, Texture, TextureLoader, TextureManager};
+use moho::renderer::{Font, Renderer, Scene, Texture};
 
 use std::time::Duration;
 
@@ -46,16 +47,16 @@ impl World for Screen {
 }
 
 impl<T: Texture> Assets<T> {
-    pub fn load<'t, FM, TL>(
+    pub fn load<FM, AM>(
         font_manager: &mut FM,
-        texture_manager: &mut TextureManager<'t, TL>,
+        texture_manager: &mut AM,
         data: &data::Game,
         world: &Screen,
     ) -> Result<Self>
     where
-        TL: TextureLoader<'t, Texture = T>,
         FM: font::Manager,
         FM::Font: Font<Texture = T>,
+        AM: asset::Loader<Texture = T>,
     {
         match *world {
             Screen::Menu(ref m) => {
@@ -67,18 +68,14 @@ impl<T: Texture> Assets<T> {
     }
 }
 
-impl<'t, FM, TL> NextScene<Screen, fixed::State, Helper<'t, FM, TL>> for Assets<TL::Texture>
+impl<FM, AM> NextScene<Screen, fixed::State, Helper<FM, AM>> for Assets<AM::Texture>
 where
-    TL: TextureLoader<'t>,
-    TL::Texture: Texture,
+    AM: asset::Loader,
+    AM::Texture: Texture,
     FM: font::Manager,
-    FM::Font: Font<Texture = TL::Texture>,
+    FM::Font: Font<Texture = AM::Texture>,
 {
-    fn next(
-        self,
-        snapshot: ::RefSnapshot<Screen>,
-        helper: &mut Helper<'t, FM, TL>,
-    ) -> Result<Self> {
+    fn next(self, snapshot: ::RefSnapshot<Screen>, helper: &mut Helper<FM, AM>) -> Result<Self> {
         match *snapshot.world {
             Screen::Menu(ref world) => match self {
                 Assets::Menu(m) => m.next(
@@ -90,7 +87,7 @@ where
                 ),
                 _ => menu::Assets::load(
                     &mut helper.font_manager,
-                    &mut helper.texture_manager,
+                    &mut helper.asset_manager,
                     &helper.data,
                     world,
                 ),

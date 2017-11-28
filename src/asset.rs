@@ -17,21 +17,25 @@ pub struct Sprite<T> {
     pub dst: options::Destination,
 }
 
-pub trait AssetLoader<T> {
-    fn texture(&mut self, texture: &data::Texture) -> Result<Rc<T>>;
-    fn animation(&mut self, animation: &data::Animation) -> Result<animation::Data<T>>;
+pub trait Loader {
+    type Texture;
+
+    fn texture(&mut self, texture: &data::Texture) -> Result<Rc<Self::Texture>>;
+    fn animation(&mut self, animation: &data::Animation) -> Result<animation::Data<Self::Texture>>;
 }
 
-impl<'t, TL> AssetLoader<TL::Texture> for TextureManager<'t, TL>
+impl<'t, TL> Loader for TextureManager<'t, TL>
 where
     TL: TextureLoader<'t>,
     TL::Texture: Texture,
 {
-    fn texture(&mut self, texture: &data::Texture) -> Result<Rc<TL::Texture>> {
+    type Texture = TL::Texture;
+
+    fn texture(&mut self, texture: &data::Texture) -> Result<Rc<Self::Texture>> {
         self.load(&format!("media/sprites/{}", texture.0))
     }
 
-    fn animation(&mut self, animation: &data::Animation) -> Result<animation::Data<TL::Texture>> {
+    fn animation(&mut self, animation: &data::Animation) -> Result<animation::Data<Self::Texture>> {
         let texture = self.texture(&animation.texture)?;
         let sheet = TileSheet::new(animation.tiles.into(), texture);
         let duration = Duration::from_millis(animation.duration / u64::from(animation.frames));

@@ -7,6 +7,7 @@ mod score_repository;
 
 use self::screen::Screen;
 use self::menu::Menu;
+use asset;
 use data;
 use errors::*;
 
@@ -33,19 +34,19 @@ where
     TL: TextureLoader<'t, Texture = T>,
 {
     let font_manager = moho_font::Manager::new(font_loader);
-    let texture_manager = TextureManager::new(texture_loader);
+    let asset_manager = TextureManager::new(texture_loader);
     let data = data::Game::load("media/game_data.yaml")?;
     let world = World {
         screen: Screen::Menu(Menu::default()),
     };
     let mut helper = Helper {
         font_manager,
-        texture_manager,
+        asset_manager,
         data,
     };
     let scene = Assets::load(
         &mut helper.font_manager,
-        &mut helper.texture_manager,
+        &mut helper.asset_manager,
         &helper.data,
         &world,
     )?;
@@ -68,17 +69,17 @@ impl engine::World for World {
     }
 }
 
-impl<'t, FM, TL> NextScene<World, fixed::State, Helper<'t, FM, TL>> for Assets<TL::Texture>
+impl<FM, AM> NextScene<World, fixed::State, Helper<FM, AM>> for Assets<AM::Texture>
 where
-    TL: TextureLoader<'t>,
-    TL::Texture: Texture,
+    AM: asset::Loader,
+    AM::Texture: Texture,
     FM: font::Manager,
-    FM::Font: Font<Texture = TL::Texture>,
+    FM::Font: Font<Texture = AM::Texture>,
 {
     fn next(
         self,
         snapshot: ::RefSnapshot<World>,
-        helper: &mut Helper<'t, FM, TL>,
+        helper: &mut Helper<FM, AM>,
     ) -> moho::errors::Result<Self> {
         self.screen
             .next(snapshot.split(|w| &w.screen), helper)
@@ -86,9 +87,9 @@ where
     }
 }
 
-pub struct Helper<'t, FM, TL: 't + TextureLoader<'t>> {
+pub struct Helper<FM, AM> {
     font_manager: FM,
-    texture_manager: TextureManager<'t, TL>,
+    asset_manager: AM,
     data: data::Game,
 }
 
@@ -97,18 +98,18 @@ pub struct Assets<T> {
 }
 
 impl<T: Texture> Assets<T> {
-    fn load<'t, FM, TL>(
+    fn load<'t, FM, AM>(
         font_manager: &mut FM,
-        texture_manager: &mut TextureManager<'t, TL>,
+        asset_manager: &mut AM,
         data: &data::Game,
         world: &World,
     ) -> moho::errors::Result<Self>
     where
-        TL: TextureLoader<'t, Texture = T>,
+        AM: asset::Loader<Texture = T>,
         FM: font::Manager,
         FM::Font: Font<Texture = T>,
     {
-        screen::Assets::load(font_manager, texture_manager, data, &world.screen)
+        screen::Assets::load(font_manager, asset_manager, data, &world.screen)
             .map(|screen| Assets { screen })
     }
 }

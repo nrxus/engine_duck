@@ -2,7 +2,7 @@ mod gui;
 
 pub use self::gui::Quit;
 use self::gui::Gui;
-use asset::{AssetLoader, Image};
+use asset::{self, Image};
 use data;
 use game::font;
 
@@ -10,8 +10,7 @@ use moho::{self, input};
 use moho::errors::*;
 use moho::engine::{NextScene, World};
 use moho::engine::step::fixed;
-use moho::renderer::{align, ColorRGBA, Font, Renderer, Scene, Texture, TextureLoader,
-                     TextureManager};
+use moho::renderer::{align, ColorRGBA, Font, Renderer, Scene, Texture};
 
 use std::rc::Rc;
 use std::time::Duration;
@@ -46,16 +45,16 @@ pub struct Assets<T> {
 }
 
 impl<T: Texture> Assets<T> {
-    pub fn load<'t, FM, TL>(
+    pub fn load<FM, AM>(
         font_manager: &mut FM,
-        texture_manager: &mut TextureManager<'t, TL>,
+        texture_manager: &mut AM,
         data: &data::Game,
         menu: &Menu,
     ) -> Result<Self>
     where
-        TL: TextureLoader<'t, Texture = T>,
         FM: font::Manager,
         FM::Font: Font<Texture = T>,
+        AM: asset::Loader<Texture = T>,
     {
         let husky = {
             let pos = align::right(640 - 32 - 30).middle(125);
