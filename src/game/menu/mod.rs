@@ -58,17 +58,26 @@ impl<T: Texture> Assets<T> {
         FM::Font: Font<Texture = T>,
     {
         let husky = {
-            let dst = align::right(640 - 32 - 30).middle(125);
-            texture_manager.load_player_image(&data.husky, dst, 2)
-        }?;
+            let pos = align::right(640 - 32 - 30).middle(125);
+            let player = &data.husky;
+            let texture = texture_manager.texture(&player.idle_texture)?;
+            let dst = player.out_size.dst(pos).scale(2);
+            Image { texture, dst }
+        };
         let duck = {
-            let dst = align::left(640 + 32 + 30).middle(125);
-            texture_manager.load_player_image(&data.duck, dst, 2)
-        }?;
+            let pos = align::left(640 + 32 + 30).middle(125);
+            let player = &data.duck;
+            let texture = texture_manager.texture(&player.idle_texture)?;
+            let dst = player.out_size.dst(pos).scale(2);
+            Image { texture, dst }
+        };
         let heart = {
-            let dst = align::center(640).middle(125);
-            texture_manager.load_image(&data.heart, dst, 2)
-        }?;
+            let pos = align::center(640).middle(125);
+            let data = &data.heart;
+            let texture = texture_manager.texture(&data.texture)?;
+            let dst = data.out_size.dst(pos).scale(2);
+            Image { texture, dst }
+        };
         let instructions = {
             let font = font_manager.load(font::Kind::KenPixel, 32)?;
             let color = ColorRGBA(255, 255, 0, 255);
@@ -79,7 +88,7 @@ impl<T: Texture> Assets<T> {
             Image { texture, dst }
         };
         let gui = {
-            let picker = texture_manager.load_texture(&data.heart.texture)?;
+            let picker = texture_manager.texture(&data.heart.texture)?;
             let font = font_manager.load(font::Kind::KenPixel, 64)?;
             gui::Assets::load(&*font, picker, &menu.gui)
         }?;

@@ -5,6 +5,7 @@ pub use self::level::{CatKind, GroundKind, Level, Obstacle};
 use errors::*;
 
 use glm;
+use moho::renderer::options::{Destination, Position};
 use serde_yaml;
 
 use std::fs::File;
@@ -16,7 +17,7 @@ pub struct Dimension {
 }
 
 #[derive(Debug, Deserialize)]
-pub struct Sprite {
+pub struct Animation {
     pub texture: Texture,
     pub frames: u32,
     pub tiles: Dimension,
@@ -34,7 +35,7 @@ pub enum Shape {
 
 #[derive(Debug, Deserialize)]
 pub struct Player {
-    pub animation: Sprite,
+    pub animation: Animation,
     pub idle_texture: Texture,
     pub out_size: Dimension,
     pub body: Vec<Shape>,
@@ -43,8 +44,8 @@ pub struct Player {
 
 #[derive(Debug, Deserialize)]
 pub struct Cat {
-    pub idle: Sprite,
-    pub walking: Sprite,
+    pub idle: Animation,
+    pub walking: Animation,
     pub out_size: Dimension,
     pub body: Vec<Shape>,
 }
@@ -57,7 +58,7 @@ pub struct Image {
 
 #[derive(Debug, Deserialize)]
 pub struct Collectable {
-    pub animation: Sprite,
+    pub animation: Animation,
     pub out_size: Dimension,
     pub score: u32,
 }
@@ -112,5 +113,11 @@ impl From<Dimension> for glm::DVec2 {
     fn from(dim: Dimension) -> glm::DVec2 {
         let Dimension { x, y } = dim;
         glm::dvec2(x.into(), y.into())
+    }
+}
+
+impl Dimension {
+    pub fn dst(self, pos: Position) -> Destination {
+        pos.dims(self.into())
     }
 }
