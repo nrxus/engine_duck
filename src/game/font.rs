@@ -1,6 +1,8 @@
+use asset::Image;
+
 use moho::errors::*;
-use moho::renderer::font;
-use moho::renderer::FontLoader;
+use moho::renderer::options::Position;
+use moho::renderer::{font, ColorRGBA, FontLoader, Texture};
 
 use std::rc::Rc;
 
@@ -38,5 +40,25 @@ where
             path: kind.path(),
             size,
         }).chain_err(|| format!("cannot load font in path: {:?}", kind.path()))
+    }
+}
+
+pub trait FontExt {
+    type Texture: Texture;
+
+    fn image(&self, text: &str, color: &ColorRGBA, pos: Position) -> Result<Image<Self::Texture>>;
+}
+
+impl<F> FontExt for F
+where
+    F: font::Font,
+    F::Texture: Texture,
+{
+    type Texture = F::Texture;
+
+    fn image(&self, text: &str, color: &ColorRGBA, pos: Position) -> Result<Image<Self::Texture>> {
+        let texture = self.texturize(text, color).map(Rc::new)?;
+        let dst = pos.dims(texture.dims());
+        Ok(Image { texture, dst })
     }
 }

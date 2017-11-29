@@ -1,14 +1,12 @@
 use asset::Image;
-use game::font;
+use game::font::{self, FontExt};
 
 use moho::{self, input};
 use moho::engine::World;
 use moho::errors::*;
 use moho::renderer::{align, ColorRGBA, Font, Renderer, Scene, Texture};
-use moho::renderer::options::Position;
 use sdl2::keyboard::Keycode;
 
-use std::rc::Rc;
 use std::time::Duration;
 
 pub struct HighScore {}
@@ -45,14 +43,10 @@ impl<T: Texture> Assets<T> {
 
         let instructions = {
             let text = "<PRESS ENTER TO GO TO MAIN MENU>";
-            let texture = font_manager
-                .load(font::Kind::KenPixel, 32)
-                .and_then(|f| f.texturize(text, &color))
-                .map(Rc::new)?;
-            let dims = texture.dims();
-            let dst = center.bottom(720 - dims.y as i32).dims(dims);
-            Image { texture, dst }
-        };
+            let font = font_manager.load(font::Kind::KenPixel, 32)?;
+            let height = font.measure(text)?.y as i32;
+            font.image(text, &color, center.bottom(720 - height))
+        }?;
 
         let scores = {
             let font = font_manager.load(font::Kind::Joystix, 32)?;
@@ -86,25 +80,5 @@ where
         renderer.show(&self.title)?;
         renderer.show(&self.instructions)?;
         self.scores.iter().map(|s| renderer.show(s)).collect()
-    }
-}
-
-trait FontExt {
-    type Texture: Texture;
-
-    fn image(&self, text: &str, color: &ColorRGBA, pos: Position) -> Result<Image<Self::Texture>>;
-}
-
-impl<F> FontExt for F
-where
-    F: Font,
-    F::Texture: Texture,
-{
-    type Texture = F::Texture;
-
-    fn image(&self, text: &str, color: &ColorRGBA, pos: Position) -> Result<Image<Self::Texture>> {
-        let texture = self.texturize(text, color).map(Rc::new)?;
-        let dst = pos.dims(texture.dims());
-        Ok(Image { texture, dst })
     }
 }

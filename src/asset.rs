@@ -44,10 +44,7 @@ where
     }
 }
 
-impl<'t, R: Renderer<'t>> Scene<R> for Image<R::Texture>
-where
-    R::Texture: Texture,
-{
+impl<'t, R: Renderer<'t>> Scene<R> for Image<R::Texture> {
     fn show(&self, renderer: &mut R) -> Result<()> {
         renderer.copy(&*self.texture, options::at(self.dst))
     }

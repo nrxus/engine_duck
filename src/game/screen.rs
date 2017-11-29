@@ -22,7 +22,7 @@ pub enum Screen {
 pub enum Assets<T> {
     Menu(menu::Assets<T>),
     HighScore(high_score::Assets<T>),
-    PlayerSelect(player_select::Assets),
+    PlayerSelect(player_select::Assets<T>),
 }
 
 impl World for Screen {
@@ -62,7 +62,9 @@ impl<T: Texture> Assets<T> {
                 menu::Assets::load(font_manager, texture_manager, data, m).map(Assets::Menu)
             }
             Screen::HighScore(_) => high_score::Assets::load(font_manager).map(Assets::HighScore),
-            Screen::PlayerSelect(_) => player_select::Assets::load().map(Assets::PlayerSelect),
+            Screen::PlayerSelect(_) => {
+                player_select::Assets::load(font_manager).map(Assets::PlayerSelect)
+            }
         }
     }
 }
@@ -95,7 +97,9 @@ where
             }.map(Assets::HighScore),
             Screen::PlayerSelect(_) => match self {
                 Assets::PlayerSelect(ps) => Ok(Assets::PlayerSelect(ps)),
-                _ => player_select::Assets::load().map(Assets::PlayerSelect),
+                _ => {
+                    player_select::Assets::load(&mut helper.font_manager).map(Assets::PlayerSelect)
+                }
             },
         }
     }
@@ -109,7 +113,7 @@ where
         match *self {
             Assets::Menu(ref m) => renderer.show(m),
             Assets::HighScore(ref hs) => renderer.show(hs),
-            Assets::PlayerSelect(_) => Ok(()),
+            Assets::PlayerSelect(ref ps) => renderer.show(ps),
         }
     }
 }
