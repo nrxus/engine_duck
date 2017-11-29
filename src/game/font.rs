@@ -20,7 +20,8 @@ impl Kind {
 }
 
 pub trait Manager: Sized {
-    type Font;
+    type Font: font::Font<Texture = Self::Texture>;
+    type Texture;
 
     fn load(&mut self, kind: Kind, size: u16) -> Result<Rc<Self::Font>>;
 }
@@ -30,6 +31,7 @@ where
     FL: FontLoader<'f>,
 {
     type Font = FL::Font;
+    type Texture = <FL::Font as font::Font>::Texture;
 
     fn load(&mut self, kind: Kind, size: u16) -> Result<Rc<FL::Font>> {
         self.load(&font::Details {

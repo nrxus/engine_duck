@@ -34,8 +34,7 @@ pub struct Assets<T> {
 impl<T: Texture> Assets<T> {
     pub fn load<FM>(font_manager: &mut FM) -> Result<Self>
     where
-        FM: font::Manager,
-        FM::Font: Font<Texture = T>,
+        FM: font::Manager<Texture = T>,
     {
         let color = ColorRGBA(255, 255, 0, 255);
         let center = align::center(640);
@@ -96,12 +95,12 @@ trait FontExt {
     fn image(&self, text: &str, color: &ColorRGBA, pos: Position) -> Result<Image<Self::Texture>>;
 }
 
-impl<T> FontExt for T
+impl<F> FontExt for F
 where
-    T: Font,
-    T::Texture: Texture,
+    F: Font,
+    F::Texture: Texture,
 {
-    type Texture = T::Texture;
+    type Texture = F::Texture;
 
     fn image(&self, text: &str, color: &ColorRGBA, pos: Position) -> Result<Image<Self::Texture>> {
         let texture = self.texturize(text, color).map(Rc::new)?;

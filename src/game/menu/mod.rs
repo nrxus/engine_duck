@@ -52,8 +52,7 @@ impl<T: Texture> Assets<T> {
         menu: &Menu,
     ) -> Result<Self>
     where
-        FM: font::Manager,
-        FM::Font: Font<Texture = T>,
+        FM: font::Manager<Texture = T>,
         AM: asset::Loader<Texture = T>,
     {
         let husky = {

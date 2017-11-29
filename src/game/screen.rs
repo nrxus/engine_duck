@@ -9,7 +9,7 @@ use moho::{self, input};
 use moho::errors::*;
 use moho::engine::{NextScene, World};
 use moho::engine::step::fixed;
-use moho::renderer::{Font, Renderer, Scene, Texture};
+use moho::renderer::{Renderer, Scene, Texture};
 
 use std::time::Duration;
 
@@ -54,8 +54,7 @@ impl<T: Texture> Assets<T> {
         world: &Screen,
     ) -> Result<Self>
     where
-        FM: font::Manager,
-        FM::Font: Font<Texture = T>,
+        FM: font::Manager<Texture = T>,
         AM: asset::Loader<Texture = T>,
     {
         match *world {
@@ -72,8 +71,7 @@ impl<FM, AM> NextScene<Screen, fixed::State, Helper<FM, AM>> for Assets<AM::Text
 where
     AM: asset::Loader,
     AM::Texture: Texture,
-    FM: font::Manager,
-    FM::Font: Font<Texture = AM::Texture>,
+    FM: font::Manager<Texture = AM::Texture>,
 {
     fn next(self, snapshot: ::RefSnapshot<Screen>, helper: &mut Helper<FM, AM>) -> Result<Self> {
         match *snapshot.world {
