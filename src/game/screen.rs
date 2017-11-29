@@ -55,7 +55,7 @@ impl<T: Texture> Assets<T> {
     ) -> Result<Self>
     where
         FM: font::Manager<Texture = T>,
-        AM: asset::Loader<Texture = T>,
+        AM: asset::Manager<Texture = T>,
     {
         match *world {
             Screen::Menu(ref m) => {
@@ -69,7 +69,7 @@ impl<T: Texture> Assets<T> {
 
 impl<FM, AM> NextScene<Screen, fixed::State, Helper<FM, AM>> for Assets<AM::Texture>
 where
-    AM: asset::Loader,
+    AM: asset::Manager,
     AM::Texture: Texture,
     FM: font::Manager<Texture = AM::Texture>,
 {

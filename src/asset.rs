@@ -17,14 +17,14 @@ pub struct Sprite<T> {
     pub dst: options::Destination,
 }
 
-pub trait Loader {
+pub trait Manager {
     type Texture;
 
     fn texture(&mut self, texture: &data::Texture) -> Result<Rc<Self::Texture>>;
     fn animation(&mut self, animation: &data::Animation) -> Result<animation::Data<Self::Texture>>;
 }
 
-impl<'t, TL> Loader for TextureManager<'t, TL>
+impl<'t, TL> Manager for TextureManager<'t, TL>
 where
     TL: TextureLoader<'t>,
     TL::Texture: Texture,

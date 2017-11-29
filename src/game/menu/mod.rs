@@ -53,7 +53,7 @@ impl<T: Texture> Assets<T> {
     ) -> Result<Self>
     where
         FM: font::Manager<Texture = T>,
-        AM: asset::Loader<Texture = T>,
+        AM: asset::Manager<Texture = T>,
     {
         let husky = {
             let pos = align::right(640 - 32 - 30).middle(125);

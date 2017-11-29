@@ -71,7 +71,7 @@ impl engine::World for World {
 
 impl<FM, AM> NextScene<World, fixed::State, Helper<FM, AM>> for Assets<AM::Texture>
 where
-    AM: asset::Loader,
+    AM: asset::Manager,
     AM::Texture: Texture,
     FM: font::Manager<Texture = AM::Texture>,
 {
@@ -104,7 +104,7 @@ impl<T: Texture> Assets<T> {
         world: &World,
     ) -> moho::errors::Result<Self>
     where
-        AM: asset::Loader<Texture = T>,
+        AM: asset::Manager<Texture = T>,
         FM: font::Manager<Texture = T>,
     {
         screen::Assets::load(font_manager, asset_manager, data, &world.screen)
