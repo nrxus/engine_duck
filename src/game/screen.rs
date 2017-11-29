@@ -70,7 +70,6 @@ impl<T: Texture> Assets<T> {
 impl<FM, AM> NextScene<Screen, fixed::State, Helper<FM, AM>> for Assets<AM::Texture>
 where
     AM: asset::Manager,
-    AM::Texture: Texture,
     FM: font::Manager<Texture = AM::Texture>,
 {
     fn next(self, snapshot: ::RefSnapshot<Screen>, helper: &mut Helper<FM, AM>) -> Result<Self> {

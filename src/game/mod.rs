@@ -72,7 +72,6 @@ impl engine::World for World {
 impl<FM, AM> NextScene<World, fixed::State, Helper<FM, AM>> for Assets<AM::Texture>
 where
     AM: asset::Manager,
-    AM::Texture: Texture,
     FM: font::Manager<Texture = AM::Texture>,
 {
     fn next(

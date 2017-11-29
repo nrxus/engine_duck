@@ -18,7 +18,7 @@ pub struct Sprite<T> {
 }
 
 pub trait Manager {
-    type Texture;
+    type Texture: Texture;
 
     fn texture(&mut self, texture: &data::Texture) -> Result<Rc<Self::Texture>>;
     fn animation(&mut self, animation: &data::Animation) -> Result<animation::Data<Self::Texture>>;
