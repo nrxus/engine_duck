@@ -47,19 +47,18 @@ impl World for Screen {
 }
 
 impl<T: Texture> Assets<T> {
-    pub fn load<FM, AM>(
-        font_manager: &mut FM,
-        texture_manager: &mut AM,
-        data: &data::Game,
-        world: &Screen,
-    ) -> Result<Self>
+    pub fn load<FM, AM>(world: &Screen, helper: &mut Helper<FM, AM>) -> Result<Self>
     where
         FM: font::Manager<Texture = T>,
         AM: asset::Manager<Texture = T>,
     {
+        let font_manager = &mut helper.font_manager;
+        let asset_manager = &mut helper.asset_manager;
+        let data = &helper.data;
+
         match *world {
             Screen::Menu(ref m) => {
-                menu::Assets::load(font_manager, texture_manager, data, m).map(Assets::Menu)
+                menu::Assets::load(font_manager, asset_manager, data, m).map(Assets::Menu)
             }
             Screen::HighScore(_) => high_score::Assets::load(font_manager).map(Assets::HighScore),
             Screen::PlayerSelect(_) => {
@@ -83,23 +82,16 @@ where
                         step_state: snapshot.step_state,
                     },
                     &mut (),
-                ),
-                _ => menu::Assets::load(
-                    &mut helper.font_manager,
-                    &mut helper.asset_manager,
-                    &helper.data,
-                    world,
-                ),
-            }.map(Assets::Menu),
+                ).map(Assets::Menu),
+                _ => Assets::load(snapshot.world, helper),
+            },
             Screen::HighScore(_) => match self {
-                Assets::HighScore(hs) => Ok(hs),
-                _ => high_score::Assets::load(&mut helper.font_manager),
-            }.map(Assets::HighScore),
+                hs @ Assets::HighScore(_) => Ok(hs),
+                _ => Assets::load(snapshot.world, helper),
+            },
             Screen::PlayerSelect(_) => match self {
-                Assets::PlayerSelect(ps) => Ok(Assets::PlayerSelect(ps)),
-                _ => {
-                    player_select::Assets::load(&mut helper.font_manager).map(Assets::PlayerSelect)
-                }
+                ps @ Assets::PlayerSelect(_) => Ok(ps),
+                _ => Assets::load(snapshot.world, helper),
             },
         }
     }

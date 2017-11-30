@@ -44,12 +44,7 @@ where
         asset_manager,
         data,
     };
-    let scene = Assets::load(
-        &mut helper.font_manager,
-        &mut helper.asset_manager,
-        &helper.data,
-        &world,
-    )?;
+    let scene = Assets::load(&world, &mut helper)?;
     engine
         .run::<Assets<C::Texture>, _, _>(world, scene, helper)
         .map_err(Into::into)
@@ -96,18 +91,12 @@ pub struct Assets<T> {
 }
 
 impl<T: Texture> Assets<T> {
-    fn load<'t, FM, AM>(
-        font_manager: &mut FM,
-        asset_manager: &mut AM,
-        data: &data::Game,
-        world: &World,
-    ) -> moho::errors::Result<Self>
+    fn load<'t, FM, AM>(world: &World, helper: &mut Helper<FM, AM>) -> moho::errors::Result<Self>
     where
         AM: asset::Manager<Texture = T>,
         FM: font::Manager<Texture = T>,
     {
-        screen::Assets::load(font_manager, asset_manager, data, &world.screen)
-            .map(|screen| Assets { screen })
+        screen::Assets::load(&world.screen, helper).map(|screen| Assets { screen })
     }
 }
 
