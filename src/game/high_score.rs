@@ -72,10 +72,7 @@ impl<T: Texture> Assets<T> {
     }
 }
 
-impl<'t, R: Renderer<'t>> Scene<R> for Assets<R::Texture>
-where
-    R::Texture: Texture,
-{
+impl<'t, R: Renderer<'t>> Scene<R> for Assets<R::Texture> {
     fn show(&self, renderer: &mut R) -> Result<()> {
         renderer.show(&self.title)?;
         renderer.show(&self.instructions)?;
