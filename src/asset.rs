@@ -2,20 +2,10 @@ use data;
 
 use moho::animation::{self, animator, TileSheet};
 use moho::errors::*;
-use moho::renderer::{options, Renderer, Scene, Texture, TextureLoader, TextureManager};
+use moho::texture::{self, Texture};
 
 use std::rc::Rc;
 use std::time::Duration;
-
-pub struct Image<T> {
-    pub texture: Rc<T>,
-    pub dst: options::Destination,
-}
-
-pub struct Sprite<T> {
-    pub animation: animation::Data<T>,
-    pub dst: options::Destination,
-}
 
 pub trait Manager {
     type Texture: Texture;
@@ -24,9 +14,9 @@ pub trait Manager {
     fn animation(&mut self, animation: &data::Animation) -> Result<animation::Data<Self::Texture>>;
 }
 
-impl<'t, TL> Manager for TextureManager<'t, TL>
+impl<'t, TL> Manager for texture::Manager<'t, TL>
 where
-    TL: TextureLoader<'t>,
+    TL: texture::Loader<'t>,
     TL::Texture: Texture,
 {
     type Texture = TL::Texture;
@@ -41,11 +31,5 @@ where
         let duration = Duration::from_millis(animation.duration / u64::from(animation.frames));
         let animator = animator::Data::new(animation.frames, duration);
         Ok(animation::Data::new(animator, sheet))
-    }
-}
-
-impl<'t, R: Renderer<'t>> Scene<R> for Image<R::Texture> {
-    fn show(&self, renderer: &mut R) -> Result<()> {
-        renderer.copy(&*self.texture, options::at(self.dst))
     }
 }

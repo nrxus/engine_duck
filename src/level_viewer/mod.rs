@@ -7,10 +7,10 @@ use moho::renderer::{self, Renderer};
 
 use std::time::Duration;
 
-pub fn run<'t, E, C>(engine: &mut Engine<E, C, fixed::FixedUpdate>) -> Result<()>
+pub fn run<E, C>(engine: &mut Engine<E, C, fixed::FixedUpdate>) -> Result<()>
 where
     E: input::EventPump,
-    C: renderer::Canvas<'t>,
+    C: renderer::Canvas,
 {
     let world = World {};
     let helper = Helper {};
@@ -40,7 +40,7 @@ impl NextScene<World, fixed::State, Helper> for Assets {
     }
 }
 
-impl<'t, R: Renderer<'t>> renderer::Scene<R> for Assets {
+impl<R: Renderer> renderer::Show<R> for Assets {
     fn show(&self, _: &mut R) -> moho::errors::Result<()> {
         Ok(())
     }

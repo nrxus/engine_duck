@@ -1,10 +1,11 @@
-use asset::Image;
-use game::font::{self, FontExt};
+use game::font;
 
 use moho::{self, input};
 use moho::engine::World;
 use moho::errors::*;
-use moho::renderer::{align, ColorRGBA, Font, Renderer, Scene, Texture};
+use moho::font::Font;
+use moho::texture::{Image, Texture};
+use moho::renderer::{align, ColorRGBA, Draw, Renderer, Show};
 use sdl2::keyboard::Keycode;
 
 use std::time::Duration;
@@ -37,16 +38,19 @@ impl<T: Texture> Assets<T> {
         let color = ColorRGBA(255, 255, 0, 255);
         let center = align::center(640);
 
-        let title = font_manager
-            .load(font::Kind::KenPixel, 64)
-            .and_then(|f| f.image("High Scores", &color, center.top(0)))?;
+        let title = {
+            let text = "High Scores";
+            let font = font_manager.load(font::Kind::KenPixel, 64)?;
+            font.texturize(text, &color)?.at(center.top(0))
+        };
 
         let instructions = {
             let text = "<PRESS ENTER TO GO TO MAIN MENU>";
             let font = font_manager.load(font::Kind::KenPixel, 32)?;
             let height = font.measure(text)?.y as i32;
-            font.image(text, &color, center.bottom(720 - height))
-        }?;
+            font.texturize(text, &color)?
+                .at(center.bottom(720 - height))
+        };
 
         let scores = {
             let font = font_manager.load(font::Kind::Joystix, 32)?;
@@ -57,7 +61,7 @@ impl<T: Texture> Assets<T> {
             let mut vec = Vec::with_capacity(scores.len());
             for s in scores {
                 let score = format!("{:06}{:5}{:>6}", s.score, "", s.name);
-                let image = font.image(&score, &color, center.top(top))?;
+                let image = font.texturize(&score, &color)?.at(center.top(top));
                 top += image.dst.dims.y as i32;
                 vec.push(image);
             }
@@ -72,7 +76,7 @@ impl<T: Texture> Assets<T> {
     }
 }
 
-impl<'t, R: Renderer<'t>> Scene<R> for Assets<R::Texture> {
+impl<R: Renderer, T: Draw<R>> Show<R> for Assets<T> {
     fn show(&self, renderer: &mut R) -> Result<()> {
         renderer.show(&self.title)?;
         renderer.show(&self.instructions)?;

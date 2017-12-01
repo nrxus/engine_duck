@@ -2,7 +2,7 @@ mod gui;
 
 pub use self::gui::Quit;
 use self::gui::Gui;
-use asset::{self, Image};
+use asset;
 use data;
 use game::font;
 
@@ -10,7 +10,9 @@ use moho::{self, input};
 use moho::errors::*;
 use moho::engine::{NextScene, World};
 use moho::engine::step::fixed;
-use moho::renderer::{align, ColorRGBA, Font, Renderer, Scene, Texture};
+use moho::font::Font;
+use moho::texture::{Image, Texture};
+use moho::renderer::{align, ColorRGBA, Draw, Renderer, Show};
 
 use std::rc::Rc;
 use std::time::Duration;
@@ -101,10 +103,7 @@ impl<T: Texture> Assets<T> {
     }
 }
 
-impl<'t, R: Renderer<'t>> Scene<R> for Assets<R::Texture>
-where
-    R::Texture: Texture,
-{
+impl<R: Renderer, T: Draw<R> + Texture> Show<R> for Assets<T> {
     fn show(&self, renderer: &mut R) -> Result<()> {
         renderer.show(&self.husky)?;
         renderer.show(&self.duck)?;

@@ -14,27 +14,26 @@ use errors::*;
 use moho::{self, input};
 use moho::engine::{self, Engine, NextScene};
 use moho::engine::step::fixed;
-use moho::renderer::{self, ColorRGBA, Font, FontLoader, Renderer, Texture, TextureLoader,
-                     TextureManager};
-use moho::renderer::font as moho_font;
+use moho::renderer::{self, ColorRGBA, Draw, Renderer};
+use moho::texture::{self, Texture};
 
 use std::time::Duration;
 
-pub fn run<'t, 'f, E, C, FL, TL, T: Texture>(
+pub fn run<'t, 'f, E, C, FL, TL, T>(
     engine: &mut Engine<E, C, fixed::FixedUpdate>,
     texture_loader: &'t TL,
     font_loader: &'f FL,
 ) -> Result<()>
 where
+    T: Texture + Draw<C>,
     E: input::EventPump,
-    C: renderer::Canvas<'t, Texture = T>,
-    C::Texture: Texture,
-    FL: FontLoader<'f>,
-    FL::Font: Font<Texture = T>,
-    TL: TextureLoader<'t, Texture = T>,
+    C: renderer::Canvas,
+    FL: moho::font::Loader<'f>,
+    FL::Font: moho::font::Font<Texture = T>,
+    TL: texture::Loader<'t, Texture = T>,
 {
-    let font_manager = moho_font::Manager::new(font_loader);
-    let asset_manager = TextureManager::new(texture_loader);
+    let font_manager = moho::font::Manager::new(font_loader);
+    let asset_manager = texture::Manager::new(texture_loader);
     let data = data::Game::load("media/game_data.yaml")?;
     let world = World {
         screen: Screen::Menu(Menu::default()),
@@ -46,7 +45,7 @@ where
     };
     let scene = Assets::load(&world, &mut helper)?;
     engine
-        .run::<Assets<C::Texture>, _, _>(world, scene, helper)
+        .run::<Assets<TL::Texture>, _, _>(world, scene, helper)
         .map_err(Into::into)
 }
 
@@ -100,10 +99,7 @@ impl<T: Texture> Assets<T> {
     }
 }
 
-impl<'t, R: Renderer<'t>> renderer::Scene<R> for Assets<R::Texture>
-where
-    R::Texture: Texture,
-{
+impl<R: Renderer, T: Texture + Draw<R>> renderer::Show<R> for Assets<T> {
     fn show(&self, renderer: &mut R) -> moho::errors::Result<()> {
         renderer.show(&self.screen)?;
         //reset to the background color

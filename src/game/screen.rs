@@ -1,5 +1,4 @@
 use asset;
-use data;
 use game::{font, Helper};
 use game::menu::{self, Menu};
 use game::high_score::{self, HighScore};
@@ -9,7 +8,8 @@ use moho::{self, input};
 use moho::errors::*;
 use moho::engine::{NextScene, World};
 use moho::engine::step::fixed;
-use moho::renderer::{Renderer, Scene, Texture};
+use moho::texture::Texture;
+use moho::renderer::{Draw, Renderer, Show};
 
 use std::time::Duration;
 
@@ -97,10 +97,7 @@ where
     }
 }
 
-impl<'t, R: Renderer<'t>> Scene<R> for Assets<R::Texture>
-where
-    R::Texture: Texture,
-{
+impl<R: Renderer, T: Draw<R> + Texture> Show<R> for Assets<T> {
     fn show(&self, renderer: &mut R) -> Result<()> {
         match *self {
             Assets::Menu(ref m) => renderer.show(m),

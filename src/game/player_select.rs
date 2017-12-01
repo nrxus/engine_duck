@@ -1,8 +1,9 @@
-use asset::{self, Image, Sprite};
-use game::font::{self, FontExt};
+use game::font;
 
 use moho::errors::*;
-use moho::renderer::{align, ColorRGBA, Font, Renderer, Scene, Texture};
+use moho::font::Font;
+use moho::texture::{Image, Texture};
+use moho::renderer::{align, ColorRGBA, Draw, Renderer, Show};
 
 pub struct PlayerSelect {}
 
@@ -21,15 +22,21 @@ impl<T: Texture> Assets<T> {
         let color = ColorRGBA(255, 255, 0, 255);
 
         let font = font_manager.load(font::Kind::KenPixel, 64)?;
-        let title = font.image("Select Player", &color, align::top(50).center(640))?;
-        let collect = font.image("Collect", &color, align::top(400).center(960))?;
-        let avoid = font.image("Avoid", &color, align::top(400).center(320))?;
+        let title = font.texturize("Select Player", &color)?
+            .at(align::top(50).center(640));
+        let collect = font.texturize("Collect", &color)?
+            .at(align::top(400).center(960));
+        let avoid = font.texturize("Avoid", &color)?
+            .at(align::top(400).center(320));
 
-        let instructions = font_manager.load(font::Kind::KenPixel, 32).and_then(|f| {
+        let instructions = {
+            let font = font_manager.load(font::Kind::KenPixel, 32)?;
             let text = "<Use Arrow Keys to choose player; then press Enter>";
-            let height = f.measure(text)?.y as i32;
-            f.image(text, &color, align::bottom(720 - height).center(640))
-        })?;
+            let height = font.measure(text)?.y as i32;
+            font.texturize(text, &color)?
+                .at(align::bottom(720 - height).center(640))
+        };
+
         Ok(Assets {
             title,
             collect,
@@ -39,7 +46,7 @@ impl<T: Texture> Assets<T> {
     }
 }
 
-impl<'t, R: Renderer<'t>> Scene<R> for Assets<R::Texture> {
+impl<R: Renderer, T: Draw<R>> Show<R> for Assets<T> {
     fn show(&self, renderer: &mut R) -> Result<()> {
         renderer.show(&self.title)?;
         renderer.show(&self.collect)?;

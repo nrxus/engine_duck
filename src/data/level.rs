@@ -2,10 +2,8 @@ use errors::*;
 use super::Dimension;
 
 use serde_yaml;
-use moho::renderer::{TextureLoader, TextureManager};
 
 use std::fs::File;
-use std::rc::Rc;
 
 #[derive(Debug, Deserialize, Clone, Copy)]
 pub enum GroundKind {

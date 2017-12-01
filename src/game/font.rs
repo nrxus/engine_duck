@@ -1,8 +1,5 @@
-use asset::Image;
-
 use moho::errors::*;
-use moho::renderer::options::Position;
-use moho::renderer::{font, ColorRGBA, FontLoader, Texture};
+use moho::font;
 
 use std::rc::Rc;
 
@@ -28,10 +25,7 @@ pub trait Manager: Sized {
     fn load(&mut self, kind: Kind, size: u16) -> Result<Rc<Self::Font>>;
 }
 
-impl<'f, FL> Manager for font::Manager<'f, FL>
-where
-    FL: FontLoader<'f>,
-{
+impl<'f, FL: font::Loader<'f>> Manager for font::Manager<'f, FL> {
     type Font = FL::Font;
     type Texture = <FL::Font as font::Font>::Texture;
 
@@ -40,25 +34,5 @@ where
             path: kind.path(),
             size,
         }).chain_err(|| format!("cannot load font in path: {:?}", kind.path()))
-    }
-}
-
-pub trait FontExt {
-    type Texture: Texture;
-
-    fn image(&self, text: &str, color: &ColorRGBA, pos: Position) -> Result<Image<Self::Texture>>;
-}
-
-impl<F> FontExt for F
-where
-    F: font::Font,
-    F::Texture: Texture,
-{
-    type Texture = F::Texture;
-
-    fn image(&self, text: &str, color: &ColorRGBA, pos: Position) -> Result<Image<Self::Texture>> {
-        let texture = self.texturize(text, color).map(Rc::new)?;
-        let dst = pos.dims(texture.dims());
-        Ok(Image { texture, dst })
     }
 }

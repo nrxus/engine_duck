@@ -68,7 +68,7 @@ fn main() {
     if level_viewer {
         level_viewer::run(&mut engine)
     } else {
-        let font_loader = moho::renderer::sdl2::font::Loader::load(&texture_loader).unwrap();
+        let font_loader = moho::sdl2_helpers::font::Loader::load(&texture_loader).unwrap();
         game::run(&mut engine, &texture_loader, &font_loader)
     }.unwrap()
 }

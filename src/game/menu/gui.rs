@@ -3,7 +3,9 @@ use moho::errors::*;
 use moho::{self, input};
 use moho::engine::step::fixed;
 use moho::engine::{NextScene, World};
-use moho::renderer::{align, options, Font, Renderer, Scene, Texture};
+use moho::font::Font;
+use moho::texture::Texture;
+use moho::renderer::{align, options, Draw, Renderer, Show};
 use sdl2::keyboard::Keycode;
 
 use std::rc::Rc;
@@ -79,10 +81,7 @@ impl<T> Assets<T> {
     }
 }
 
-impl<'t, R: Renderer<'t>> Scene<R> for Assets<R::Texture>
-where
-    R::Texture: Texture,
-{
+impl<R: Renderer, T: Draw<R> + Texture> Show<R> for Assets<T> {
     fn show(&self, renderer: &mut R) -> Result<()> {
         let (selected, unselected) = match self.selected {
             button::Kind::HighScore => (&self.high_score, &self.new_game),
@@ -94,12 +93,12 @@ where
             let dst = align::right(rect.x - 10)
                 .middle(rect.y + rect.w / 2)
                 .dims(self.picker.dims());
-            renderer.copy(&*self.picker, options::at(dst))?;
-            renderer.copy(&*selected.selected, options::at(selected.dst))
+            renderer.draw(&*self.picker, options::at(dst))?;
+            renderer.draw(&*selected.selected, options::at(selected.dst))
         }?;
         //unselected
         {
-            renderer.copy(&*unselected.idle, options::at(unselected.dst))
+            renderer.draw(&*unselected.idle, options::at(unselected.dst))
         }
     }
 }
@@ -107,7 +106,8 @@ where
 mod button {
     use glm;
     use moho::errors::*;
-    use moho::renderer::{align, options, ColorRGBA, Font};
+    use moho::font::Font;
+    use moho::renderer::{align, options, ColorRGBA};
 
     use std::rc::Rc;
 
