@@ -1,17 +1,46 @@
 use data;
 
-use moho::animation::{self, animator, TileSheet};
+use moho::animation::TileSheet;
 use moho::errors::*;
+use moho::renderer::options::{self, Destination, Options};
+use moho::renderer::{Draw, Renderer, Show};
 use moho::texture::{self, Texture};
 
 use std::rc::Rc;
-use std::time::Duration;
+
+pub struct Sprite<T> {
+    pub sheet: TileSheet<T>,
+    pub dst: Destination,
+    pub tile: u32,
+}
+
+impl<T> Sprite<T> {
+    pub fn new(sheet: TileSheet<T>, dst: Destination) -> Self {
+        Sprite {
+            sheet,
+            dst,
+            tile: 0,
+        }
+    }
+}
+
+impl<R: Renderer, T: Draw<R>> Show<R> for Sprite<T> {
+    fn show(&self, renderer: &mut R) -> Result<()> {
+        renderer.draw(&self.sheet.tile(self.tile), options::at(self.dst))
+    }
+}
+
+impl<R: Renderer, T: Draw<R>> Draw<R> for Sprite<T> {
+    fn draw(&self, options: Options, renderer: &mut R) -> Result<()> {
+        renderer.draw(&self.sheet.tile(self.tile), options.at(self.dst))
+    }
+}
 
 pub trait Manager {
     type Texture: Texture;
 
     fn texture(&mut self, texture: &data::Texture) -> Result<Rc<Self::Texture>>;
-    fn animation(&mut self, animation: &data::Animation) -> Result<animation::Data<Self::Texture>>;
+    fn animation(&mut self, animation: &data::Animation) -> Result<TileSheet<Self::Texture>>;
 }
 
 impl<'t, TL> Manager for texture::Manager<'t, TL>
@@ -27,11 +56,8 @@ where
             .map_err(Into::into)
     }
 
-    fn animation(&mut self, animation: &data::Animation) -> Result<animation::Data<Self::Texture>> {
-        let texture = self.texture(&animation.texture)?;
-        let sheet = TileSheet::new(animation.tiles.into(), texture);
-        let duration = Duration::from_millis(animation.duration / u64::from(animation.frames));
-        let animator = animator::Data::new(animation.frames, duration);
-        Ok(animation::Data::new(animator, sheet))
+    fn animation(&mut self, animation: &data::Animation) -> Result<TileSheet<Self::Texture>> {
+        self.texture(&animation.texture)
+            .map(|t| TileSheet::new(animation.tiles.into(), t))
     }
 }

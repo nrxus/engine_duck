@@ -6,7 +6,6 @@ mod screen;
 mod score_repository;
 
 use self::screen::Screen;
-use self::menu::Menu;
 use asset;
 use data;
 use errors::*;
@@ -38,7 +37,7 @@ where
     let asset_manager = texture::Manager::new(texture_loader);
     let data = data::Game::load("media/game_data.yaml")?;
     let world = World {
-        screen: Screen::Menu(Menu::default()),
+        screen: Screen::new(data.animators()),
     };
     let mut helper = Helper {
         font_manager,

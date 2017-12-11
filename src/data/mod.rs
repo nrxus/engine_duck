@@ -5,10 +5,12 @@ pub use self::level::{CatKind, GroundKind, Level, Obstacle};
 use errors::*;
 
 use glm;
+use moho::animation::animator;
 use moho::renderer::options::{Destination, Position};
 use serde_yaml;
 
 use std::fs::File;
+use std::time::Duration;
 
 #[derive(Debug, Deserialize, Clone, Copy)]
 pub struct Dimension {
@@ -16,7 +18,7 @@ pub struct Dimension {
     pub y: u32,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Clone)]
 pub struct Animation {
     pub texture: Texture,
     pub frames: u32,
@@ -93,6 +95,17 @@ impl Game {
         let f = File::open(path)?;
         serde_yaml::from_reader(&f).map_err(Into::into)
     }
+
+    pub fn animators(&self) -> Animators {
+        Animators {
+            duck: self.duck.animation.animator(),
+            husky: self.husky.animation.animator(),
+            gem: self.gem.animation.animator(),
+            cat_idle: self.cat.idle.animator(),
+            cat_walking: self.cat.walking.animator(),
+            coin: self.coin.animation.animator(),
+        }
+    }
 }
 
 impl From<Dimension> for glm::UVec2 {
@@ -120,4 +133,20 @@ impl Dimension {
     pub fn dst(self, pos: Position) -> Destination {
         pos.dims(self.into())
     }
+}
+
+impl Animation {
+    fn animator(&self) -> animator::Data {
+        let duration = Duration::from_millis(self.duration / u64::from(self.frames));
+        animator::Data::new(self.frames, duration)
+    }
+}
+
+pub struct Animators {
+    pub duck: animator::Data,
+    pub husky: animator::Data,
+    pub gem: animator::Data,
+    pub cat_idle: animator::Data,
+    pub cat_walking: animator::Data,
+    pub coin: animator::Data,
 }

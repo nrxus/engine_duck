@@ -1,4 +1,5 @@
 use asset;
+use data::Animators;
 use game::{font, Helper};
 use game::menu::{self, Menu};
 use game::high_score::{self, HighScore};
@@ -13,7 +14,21 @@ use moho::renderer::{Draw, Renderer, Show};
 
 use std::time::Duration;
 
-pub enum Screen {
+pub struct Screen {
+    animators: Animators,
+    current: Kind,
+}
+
+impl Screen {
+    pub fn new(animators: Animators) -> Self {
+        Screen {
+            animators,
+            current: Kind::Menu(Menu::default()),
+        }
+    }
+}
+
+pub enum Kind {
     Menu(Menu),
     HighScore(HighScore),
     PlayerSelect(PlayerSelect),
@@ -29,20 +44,22 @@ impl World for Screen {
     type Quit = ();
 
     fn update(self, input: &input::State, elapsed: Duration) -> moho::State<Self, ()> {
-        match self {
-            Screen::Menu(m) => m.update(input, elapsed).map(Screen::Menu).flat_map_quit(
-                |b| match b {
+        let animators = self.animators;
+        let current = match self.current {
+            Kind::Menu(m) => m.update(input, elapsed)
+                .map(Kind::Menu)
+                .flat_map_quit(|b| match b {
                     menu::Quit::NewGame => {
-                        moho::State::Running(Screen::PlayerSelect(PlayerSelect {}))
+                        moho::State::Running(Kind::PlayerSelect(PlayerSelect::new(&animators)))
                     }
-                    menu::Quit::HighScore => moho::State::Running(Screen::HighScore(HighScore {})),
-                },
-            ),
-            Screen::HighScore(hs) => hs.update(input, elapsed)
-                .map(Screen::HighScore)
-                .flat_map_quit(|_| moho::State::Running(Screen::Menu(Menu::default()))),
-            Screen::PlayerSelect(ps) => moho::State::Running(Screen::PlayerSelect(ps)),
-        }
+                    menu::Quit::HighScore => moho::State::Running(Kind::HighScore(HighScore {})),
+                }),
+            Kind::HighScore(hs) => hs.update(input, elapsed)
+                .map(Kind::HighScore)
+                .flat_map_quit(|_| moho::State::Running(Kind::Menu(Menu::default()))),
+            Kind::PlayerSelect(ps) => ps.update(input, elapsed).map(Kind::PlayerSelect),
+        };
+        current.map(|current| Screen { current, animators })
     }
 }
 
@@ -56,14 +73,13 @@ impl<T: Texture> Assets<T> {
         let asset_manager = &mut helper.asset_manager;
         let data = &helper.data;
 
-        match *world {
-            Screen::Menu(ref m) => {
+        match world.current {
+            Kind::Menu(ref m) => {
                 menu::Assets::load(font_manager, asset_manager, data, m).map(Assets::Menu)
             }
-            Screen::HighScore(_) => high_score::Assets::load(font_manager).map(Assets::HighScore),
-            Screen::PlayerSelect(_) => {
-                player_select::Assets::load(font_manager).map(Assets::PlayerSelect)
-            }
+            Kind::HighScore(_) => high_score::Assets::load(font_manager).map(Assets::HighScore),
+            Kind::PlayerSelect(_) => player_select::Assets::load(font_manager, asset_manager, data)
+                .map(Assets::PlayerSelect),
         }
     }
 }
@@ -74,17 +90,17 @@ where
     FM: font::Manager<Texture = AM::Texture>,
 {
     fn next(self, screen: &Screen, _: &fixed::State, helper: &mut Helper<FM, AM>) -> Result<Self> {
-        match *screen {
-            Screen::Menu(ref world) => match self {
+        match screen.current {
+            Kind::Menu(ref world) => match self {
                 Assets::Menu(m) => m.next(world, &(), &mut ()).map(Assets::Menu),
                 _ => Assets::load(screen, helper),
             },
-            Screen::HighScore(_) => match self {
+            Kind::HighScore(_) => match self {
                 hs @ Assets::HighScore(_) => Ok(hs),
                 _ => Assets::load(screen, helper),
             },
-            Screen::PlayerSelect(_) => match self {
-                ps @ Assets::PlayerSelect(_) => Ok(ps),
+            Kind::PlayerSelect(ref world) => match self {
+                Assets::PlayerSelect(ps) => ps.next(world, &(), &mut ()).map(Assets::PlayerSelect),
                 _ => Assets::load(screen, helper),
             },
         }
