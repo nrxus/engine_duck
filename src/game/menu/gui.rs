@@ -1,7 +1,6 @@
 use glm;
 use moho::errors::*;
 use moho::{self, input};
-use moho::engine::step::fixed;
 use moho::engine::{NextScene, World};
 use moho::font::Font;
 use moho::texture::Texture;
@@ -43,9 +42,9 @@ impl World for Gui {
     }
 }
 
-impl<T: Texture> NextScene<Gui, fixed::State, ()> for Assets<T> {
-    fn next(mut self, snapshot: ::RefSnapshot<Gui>, _: &mut ()) -> Result<Self> {
-        self.selected = snapshot.world.selected;
+impl<T: Texture> NextScene<Gui, (), ()> for Assets<T> {
+    fn next(mut self, gui: &Gui, _: &(), _: &mut ()) -> Result<Self> {
+        self.selected = gui.selected;
         Ok(self)
     }
 }

@@ -18,11 +18,13 @@ impl<'t, TL> Manager for texture::Manager<'t, TL>
 where
     TL: texture::Loader<'t>,
     TL::Texture: Texture,
+    Error: From<TL::Error>,
 {
     type Texture = TL::Texture;
 
     fn texture(&mut self, texture: &data::Texture) -> Result<Rc<Self::Texture>> {
         self.load(&format!("media/sprites/{}", texture.0))
+            .map_err(Into::into)
     }
 
     fn animation(&mut self, animation: &data::Animation) -> Result<animation::Data<Self::Texture>> {

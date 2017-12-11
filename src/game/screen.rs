@@ -73,25 +73,19 @@ where
     AM: asset::Manager,
     FM: font::Manager<Texture = AM::Texture>,
 {
-    fn next(self, snapshot: ::RefSnapshot<Screen>, helper: &mut Helper<FM, AM>) -> Result<Self> {
-        match *snapshot.world {
+    fn next(self, screen: &Screen, _: &fixed::State, helper: &mut Helper<FM, AM>) -> Result<Self> {
+        match *screen {
             Screen::Menu(ref world) => match self {
-                Assets::Menu(m) => m.next(
-                    ::RefSnapshot {
-                        world,
-                        step_state: snapshot.step_state,
-                    },
-                    &mut (),
-                ).map(Assets::Menu),
-                _ => Assets::load(snapshot.world, helper),
+                Assets::Menu(m) => m.next(world, &(), &mut ()).map(Assets::Menu),
+                _ => Assets::load(screen, helper),
             },
             Screen::HighScore(_) => match self {
                 hs @ Assets::HighScore(_) => Ok(hs),
-                _ => Assets::load(snapshot.world, helper),
+                _ => Assets::load(screen, helper),
             },
             Screen::PlayerSelect(_) => match self {
                 ps @ Assets::PlayerSelect(_) => Ok(ps),
-                _ => Assets::load(snapshot.world, helper),
+                _ => Assets::load(screen, helper),
             },
         }
     }

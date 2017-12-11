@@ -17,9 +17,10 @@ use moho::engine::step::fixed;
 use moho::renderer::{self, ColorRGBA, Draw, Renderer};
 use moho::texture::{self, Texture};
 
+use std::error;
 use std::time::Duration;
 
-pub fn run<'t, 'f, E, C, FL, TL, T>(
+pub fn run<'t, 'f, E, C, FL, TL, T, Err: error::Error>(
     engine: &mut Engine<E, C, fixed::FixedUpdate>,
     texture_loader: &'t TL,
     font_loader: &'f FL,
@@ -30,7 +31,8 @@ where
     C: renderer::Canvas,
     FL: moho::font::Loader<'f>,
     FL::Font: moho::font::Font<Texture = T>,
-    TL: texture::Loader<'t, Texture = T>,
+    TL: texture::Loader<'t, Texture = T, Error = Err>,
+    moho::errors::Error: From<Err> + From<FL::Error>,
 {
     let font_manager = moho::font::Manager::new(font_loader);
     let asset_manager = texture::Manager::new(texture_loader);
@@ -70,11 +72,12 @@ where
 {
     fn next(
         self,
-        snapshot: ::RefSnapshot<World>,
+        game: &World,
+        step: &fixed::State,
         helper: &mut Helper<FM, AM>,
     ) -> moho::errors::Result<Self> {
         self.screen
-            .next(snapshot.split(|w| &w.screen), helper)
+            .next(&game.screen, step, helper)
             .map(|screen| Assets { screen })
     }
 }

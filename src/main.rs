@@ -15,8 +15,6 @@ mod game;
 use moho::engine::{step, Engine};
 use sdl2::image::{INIT_JPG, INIT_PNG};
 
-pub type RefSnapshot<'a, W> = step::Snapshot<&'a W, &'a step::fixed::State>;
-
 pub mod errors {
     error_chain!{
         links {

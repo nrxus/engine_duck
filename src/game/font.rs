@@ -25,7 +25,10 @@ pub trait Manager: Sized {
     fn load(&mut self, kind: Kind, size: u16) -> Result<Rc<Self::Font>>;
 }
 
-impl<'f, FL: font::Loader<'f>> Manager for font::Manager<'f, FL> {
+impl<'f, FL: font::Loader<'f>> Manager for font::Manager<'f, FL>
+where
+    Error: From<FL::Error>,
+{
     type Font = FL::Font;
     type Texture = <FL::Font as font::Font>::Texture;
 
@@ -33,6 +36,6 @@ impl<'f, FL: font::Loader<'f>> Manager for font::Manager<'f, FL> {
         self.load(&font::Details {
             path: kind.path(),
             size,
-        }).chain_err(|| format!("cannot load font in path: {:?}", kind.path()))
+        }).map_err(Into::into)
     }
 }

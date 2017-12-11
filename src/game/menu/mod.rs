@@ -9,7 +9,6 @@ use game::font;
 use moho::{self, input};
 use moho::errors::*;
 use moho::engine::{NextScene, World};
-use moho::engine::step::fixed;
 use moho::font::Font;
 use moho::texture::{Image, Texture};
 use moho::renderer::{align, ColorRGBA, Draw, Renderer, Show};
@@ -30,10 +29,9 @@ impl World for Menu {
     }
 }
 
-impl<T: Texture> NextScene<Menu, fixed::State, ()> for Assets<T> {
-    fn next(mut self, snapshot: ::RefSnapshot<Menu>, _: &mut ()) -> Result<Self> {
-        let snapshot = snapshot.split(|s| &s.gui);
-        self.gui = self.gui.next(snapshot, &mut ())?;
+impl<T: Texture> NextScene<Menu, (), ()> for Assets<T> {
+    fn next(mut self, menu: &Menu, _: &(), _: &mut ()) -> Result<Self> {
+        self.gui = self.gui.next(&menu.gui, &(), &mut ())?;
         Ok(self)
     }
 }

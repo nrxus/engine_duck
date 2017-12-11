@@ -1,4 +1,3 @@
-use RefSnapshot;
 use errors::*;
 use moho::{self, input};
 use moho::engine::{self, Engine, NextScene};
@@ -35,7 +34,7 @@ pub struct Helper {}
 pub struct Assets {}
 
 impl NextScene<World, fixed::State, Helper> for Assets {
-    fn next(self, _: RefSnapshot<World>, _: &mut Helper) -> moho::errors::Result<Self> {
+    fn next(self, _: &World, _: &fixed::State, _: &mut Helper) -> moho::errors::Result<Self> {
         Ok(Assets {})
     }
 }
