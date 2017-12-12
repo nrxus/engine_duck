@@ -4,9 +4,9 @@ pub use self::gui::Quit;
 use self::gui::Gui;
 use asset;
 use data;
-use game::font;
+use game::{self, font};
 
-use moho::{self, input};
+use moho::input;
 use moho::errors::*;
 use moho::engine::{NextScene, World};
 use moho::font::Font;
@@ -24,7 +24,7 @@ pub struct Menu {
 impl World for Menu {
     type Quit = Quit;
 
-    fn update(self, input: &input::State, elapsed: Duration) -> moho::State<Self, Self::Quit> {
+    fn update(self, input: &input::State, elapsed: Duration) -> game::State<Self> {
         self.gui.update(input, elapsed).map(|gui| Menu { gui })
     }
 }

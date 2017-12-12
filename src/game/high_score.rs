@@ -1,4 +1,4 @@
-use game::font;
+use game::{self, font};
 
 use moho::{self, input};
 use moho::engine::World;
@@ -15,7 +15,7 @@ pub struct HighScore {}
 impl World for HighScore {
     type Quit = ();
 
-    fn update(self, input: &input::State, _: Duration) -> moho::State<Self, ()> {
+    fn update(self, input: &input::State, _: Duration) -> game::State<Self> {
         if input.did_press_key(Keycode::Return) {
             moho::State::Quit(())
         } else {
