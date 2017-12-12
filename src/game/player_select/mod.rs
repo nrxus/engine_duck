@@ -68,7 +68,7 @@ pub struct Assets<T> {
     gui: gui::Assets<T>,
 }
 
-impl<T> NextScene<PlayerSelect, (), ()> for Assets<T> {
+impl<T: Texture> NextScene<PlayerSelect, (), ()> for Assets<T> {
     fn next(mut self, world: &PlayerSelect, _: &(), _: &mut ()) -> Result<Self> {
         self.gem.tile = world.gem.frame();
         self.coin.tile = world.coin.frame();

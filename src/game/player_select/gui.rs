@@ -78,38 +78,40 @@ impl World for Gui {
 }
 
 enum Button<T> {
-    Selected(Sprite<T>, Rc<T>),
-    Idle(Image<T>, TileSheet<T>),
+    Selected(Sprite<T>, Rc<T>, Image<T>),
+    Idle(Image<T>, TileSheet<T>, Rc<T>),
 }
 
-impl<T> Button<T> {
+impl<T: Texture> Button<T> {
     fn deselected(self) -> Self {
         match self {
-            Button::Selected(s, texture) => Button::Idle(
-                Image {
-                    texture,
-                    dst: s.dst,
-                },
-                s.sheet,
-            ),
+            Button::Selected(s, texture, picker) => {
+                let dst = s.dst;
+                Button::Idle(Image { texture, dst }, s.sheet, picker.texture)
+            }
             b @ _ => b,
         }
     }
 
     fn selected(self, tile: u32) -> Self {
         match self {
-            Button::Selected(mut s, t) => {
+            Button::Selected(mut s, t, picker) => {
                 s.tile = tile;
-                Button::Selected(s, t)
+                Button::Selected(s, t, picker)
             }
-            Button::Idle(i, sheet) => Button::Selected(
-                Sprite {
-                    sheet,
-                    tile,
-                    dst: i.dst,
-                },
-                i.texture,
-            ),
+            Button::Idle(i, sheet, picker) => {
+                let dst = i.dst;
+                let picker = {
+                    let texture = picker;
+                    let rect = dst.rect();
+                    let dst = align::top(rect.y + rect.w + 10)
+                        .center(rect.x + rect.z / 2)
+                        .dims(texture.dims());
+                    Image { texture, dst }
+                };
+
+                Button::Selected(Sprite { sheet, tile, dst }, i.texture, picker)
+            }
         }
     }
 }
@@ -125,6 +127,7 @@ impl<T: Texture> Assets<T> {
         AM: asset::Manager<Texture = T>,
     {
         let distance = 50;
+        let picker = asset_manager.texture(&data.heart.texture)?;
         let husky = {
             let data = &data.husky;
             let texture = asset_manager.texture(&data.idle_texture)?;
@@ -132,7 +135,7 @@ impl<T: Texture> Assets<T> {
             let dst = data.out_size.dst(pos).scale(2);
             let image = Image { texture, dst };
             let sheet = asset_manager.animation(&data.animation)?;
-            Button::Idle(image, sheet)
+            Button::Idle(image, sheet, picker.clone())
         };
         let duck = {
             let data = &data.duck;
@@ -141,7 +144,7 @@ impl<T: Texture> Assets<T> {
             let dst = data.out_size.dst(pos).scale(2);
             let image = Image { texture, dst };
             let sheet = asset_manager.animation(&data.animation)?;
-            Button::Idle(image, sheet)
+            Button::Idle(image, sheet, picker)
         };
         Ok(Self { duck, husky })
     }
@@ -150,8 +153,11 @@ impl<T: Texture> Assets<T> {
 impl<T: Draw<R>, R: Renderer> Show<R> for Button<T> {
     fn show(&self, renderer: &mut R) -> Result<()> {
         match *self {
-            Button::Selected(ref s, _) => renderer.show(s),
-            Button::Idle(ref i, _) => renderer.show(i),
+            Button::Selected(ref s, _, ref p) => {
+                renderer.show(s)?;
+                renderer.show(p)
+            }
+            Button::Idle(ref i, _, _) => renderer.show(i),
         }
     }
 }
@@ -163,7 +169,7 @@ impl<T: Draw<R>, R: Renderer> Show<R> for Assets<T> {
     }
 }
 
-impl<T> NextScene<Gui, (), ()> for Assets<T> {
+impl<T: Texture> NextScene<Gui, (), ()> for Assets<T> {
     fn next(mut self, gui: &Gui, _: &(), _: &mut ()) -> Result<Self> {
         match gui.selected {
             None => {
