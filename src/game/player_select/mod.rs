@@ -1,3 +1,6 @@
+mod gui;
+
+use self::gui::Gui;
 use data::{self, Animators};
 use game::font;
 use asset::{self, Sprite};
@@ -16,6 +19,7 @@ pub struct PlayerSelect {
     gem: Animator,
     coin: Animator,
     cat: Animator,
+    gui: Gui,
 }
 
 impl PlayerSelect {
@@ -24,6 +28,7 @@ impl PlayerSelect {
             gem: animators.gem.start(),
             coin: animators.coin.start(),
             cat: animators.cat_idle.start(),
+            gui: Gui::new(animators),
         }
     }
 }
@@ -31,12 +36,23 @@ impl PlayerSelect {
 impl World for PlayerSelect {
     type Quit = ();
 
-    fn update(mut self, _: &input::State, elapsed: Duration) -> moho::State<Self, ()> {
-        self.gem.animate(elapsed);
-        self.coin.animate(elapsed);
-        self.cat.animate(elapsed);
+    fn update(self, input: &input::State, elapsed: Duration) -> moho::State<Self, ()> {
+        let mut gem = self.gem;
+        let mut coin = self.coin;
+        let mut cat = self.cat;
 
-        moho::State::Running(self)
+        self.gui.update(input, elapsed).map(|gui| {
+            gem.animate(elapsed);
+            coin.animate(elapsed);
+            cat.animate(elapsed);
+
+            PlayerSelect {
+                gui,
+                cat,
+                coin,
+                gem,
+            }
+        })
     }
 }
 
@@ -48,6 +64,7 @@ pub struct Assets<T> {
     gem: Sprite<T>,
     coin: Sprite<T>,
     cat: Sprite<T>,
+    gui: gui::Assets<T>,
 }
 
 impl<T> NextScene<PlayerSelect, (), ()> for Assets<T> {
@@ -55,6 +72,7 @@ impl<T> NextScene<PlayerSelect, (), ()> for Assets<T> {
         self.gem.tile = world.gem.frame();
         self.coin.tile = world.coin.frame();
         self.cat.tile = world.cat.frame();
+        self.gui = self.gui.next(&world.gui, &(), &mut ())?;
         Ok(self)
     }
 }
@@ -113,6 +131,8 @@ impl<T: Texture> Assets<T> {
                 .at(align::bottom(720 - height).center(640))
         };
 
+        let gui = gui::Assets::load(asset_manager, data)?;
+
         Ok(Assets {
             title,
             collect,
@@ -121,6 +141,7 @@ impl<T: Texture> Assets<T> {
             gem,
             coin,
             cat,
+            gui,
         })
     }
 }
@@ -133,6 +154,7 @@ impl<R: Renderer, T: Draw<R>> Show<R> for Assets<T> {
         renderer.show(&self.instructions)?;
         renderer.show(&self.gem)?;
         renderer.show(&self.coin)?;
-        renderer.show(&self.cat)
+        renderer.show(&self.cat)?;
+        renderer.show(&self.gui)
     }
 }
