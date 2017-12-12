@@ -1,5 +1,6 @@
 mod gui;
 
+pub use self::gui::ButtonKind as PlayerKind;
 use self::gui::Gui;
 use data::{self, Animators};
 use game::{self, font};
@@ -34,31 +35,25 @@ impl PlayerSelect {
 }
 
 impl World for PlayerSelect {
-    type Quit = super::PlayerKind;
+    type Quit = PlayerKind;
 
     fn update(self, input: &input::State, elapsed: Duration) -> game::State<Self> {
         let mut gem = self.gem;
         let mut coin = self.coin;
         let mut cat = self.cat;
 
-        self.gui
-            .update(input, elapsed)
-            .map(|gui| {
-                gem.animate(elapsed);
-                coin.animate(elapsed);
-                cat.animate(elapsed);
+        self.gui.update(input, elapsed).map(|gui| {
+            gem.animate(elapsed);
+            coin.animate(elapsed);
+            cat.animate(elapsed);
 
-                PlayerSelect {
-                    gui,
-                    cat,
-                    coin,
-                    gem,
-                }
-            })
-            .map_quit(|s| match s {
-                gui::Selected::Husky(_) => super::PlayerKind::Husky,
-                gui::Selected::Duck(_) => super::PlayerKind::Duck,
-            })
+            PlayerSelect {
+                gui,
+                cat,
+                coin,
+                gem,
+            }
+        })
     }
 }
 

@@ -14,8 +14,12 @@ use sdl2::keyboard::Keycode;
 use std::rc::Rc;
 use std::time::Duration;
 
-#[derive(Debug, Clone, Copy)]
-pub enum Selected {
+pub enum ButtonKind {
+    Husky,
+    Duck,
+}
+
+enum Selected {
     Husky(Animator),
     Duck(Animator),
 }
@@ -37,7 +41,7 @@ impl Gui {
 }
 
 impl World for Gui {
-    type Quit = Selected;
+    type Quit = ButtonKind;
 
     fn update(mut self, input: &input::State, elapsed: Duration) -> game::State<Self> {
         let (left, right) = {
@@ -61,7 +65,13 @@ impl World for Gui {
         };
 
         match self.selected {
-            Some(a) if input.did_press_key(Keycode::Return) => moho::State::Quit(a),
+            Some(ref a) if input.did_press_key(Keycode::Return) => {
+                let selected = match *a {
+                    Selected::Husky(_) => ButtonKind::Husky,
+                    Selected::Duck(_) => ButtonKind::Duck,
+                };
+                moho::State::Quit(selected)
+            }
             _ => moho::State::Running(self),
         }
     }

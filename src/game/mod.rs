@@ -21,11 +21,6 @@ use std::time::Duration;
 
 type State<W: engine::World> = moho::State<W, W::Quit>;
 
-pub enum PlayerKind {
-    Duck,
-    Husky,
-}
-
 pub fn run<'t, 'f, E, C, FL, TL, T, Err: error::Error>(
     engine: &mut Engine<E, C, fixed::FixedUpdate>,
     texture_loader: &'t TL,
