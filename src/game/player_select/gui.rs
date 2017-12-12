@@ -1,5 +1,6 @@
 use asset::{self, Sprite};
 use data::{self, Animators};
+use game;
 
 use moho::animation::animator::{self, Animator};
 use moho::animation::TileSheet;
@@ -13,6 +14,7 @@ use sdl2::keyboard::Keycode;
 use std::rc::Rc;
 use std::time::Duration;
 
+#[derive(Debug, Clone, Copy)]
 pub enum Selected {
     Husky(Animator),
     Duck(Animator),
@@ -35,9 +37,9 @@ impl Gui {
 }
 
 impl World for Gui {
-    type Quit = ();
+    type Quit = Selected;
 
-    fn update(mut self, input: &input::State, elapsed: Duration) -> moho::State<Self, ()> {
+    fn update(mut self, input: &input::State, elapsed: Duration) -> game::State<Self> {
         let (left, right) = {
             let left = input.did_press_key(Keycode::Left);
             let right = input.did_press_key(Keycode::Right);
@@ -58,7 +60,10 @@ impl World for Gui {
             _ => None,
         };
 
-        moho::State::Running(self)
+        match self.selected {
+            Some(a) if input.did_press_key(Keycode::Return) => moho::State::Quit(a),
+            _ => moho::State::Running(self),
+        }
     }
 }
 

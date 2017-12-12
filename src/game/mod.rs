@@ -19,6 +19,13 @@ use moho::texture::{self, Texture};
 use std::error;
 use std::time::Duration;
 
+type State<W: engine::World> = moho::State<W, W::Quit>;
+
+pub enum PlayerKind {
+    Duck,
+    Husky,
+}
+
 pub fn run<'t, 'f, E, C, FL, TL, T, Err: error::Error>(
     engine: &mut Engine<E, C, fixed::FixedUpdate>,
     texture_loader: &'t TL,
@@ -57,7 +64,7 @@ pub struct World {
 impl engine::World for World {
     type Quit = ();
 
-    fn update(self, input: &input::State, elapsed: Duration) -> moho::State<Self, ()> {
+    fn update(self, input: &input::State, elapsed: Duration) -> State<Self> {
         self.screen
             .update(input, elapsed)
             .map(|screen| World { screen })

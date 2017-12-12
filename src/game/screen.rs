@@ -1,6 +1,6 @@
 use asset;
 use data::Animators;
-use game::{font, Helper};
+use game::{self, font, Helper};
 use game::menu::{self, Menu};
 use game::high_score::{self, HighScore};
 use game::player_select::{self, PlayerSelect};
@@ -43,7 +43,7 @@ pub enum Assets<T> {
 impl World for Screen {
     type Quit = ();
 
-    fn update(self, input: &input::State, elapsed: Duration) -> moho::State<Self, ()> {
+    fn update(self, input: &input::State, elapsed: Duration) -> game::State<Self> {
         let animators = self.animators;
         let current = match self.current {
             Kind::Menu(m) => m.update(input, elapsed)
@@ -57,7 +57,9 @@ impl World for Screen {
             Kind::HighScore(hs) => hs.update(input, elapsed)
                 .map(Kind::HighScore)
                 .flat_map_quit(|_| moho::State::Running(Kind::Menu(Menu::default()))),
-            Kind::PlayerSelect(ps) => ps.update(input, elapsed).map(Kind::PlayerSelect),
+            Kind::PlayerSelect(ps) => ps.update(input, elapsed)
+                .map(Kind::PlayerSelect)
+                .map_quit(|_| ()),
         };
         current.map(|current| Screen { current, animators })
     }
