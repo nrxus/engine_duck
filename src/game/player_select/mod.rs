@@ -1,7 +1,9 @@
 mod gui;
+mod collect;
 
 pub use self::gui::ButtonKind as PlayerKind;
 use self::gui::Gui;
+use self::collect::Collect;
 use data::{self, Animators};
 use game::{self, font};
 use asset::{self, Sprite};
@@ -17,8 +19,7 @@ use moho::renderer::{align, ColorRGBA, Draw, Renderer, Show};
 use std::time::Duration;
 
 pub struct PlayerSelect {
-    gem: Animator,
-    coin: Animator,
+    collect: Collect,
     cat: Animator,
     gui: Gui,
 }
@@ -26,8 +27,7 @@ pub struct PlayerSelect {
 impl PlayerSelect {
     pub fn new(animators: &Animators) -> Self {
         PlayerSelect {
-            gem: animators.gem.start(),
-            coin: animators.coin.start(),
+            collect: Collect::new(animators),
             cat: animators.cat_idle.start(),
             gui: Gui::new(animators),
         }
@@ -38,41 +38,30 @@ impl World for PlayerSelect {
     type Quit = PlayerKind;
 
     fn update(self, input: &input::State, elapsed: Duration) -> game::State<Self> {
-        let mut gem = self.gem;
-        let mut coin = self.coin;
         let mut cat = self.cat;
+        let collect = self.collect;
 
         self.gui.update(input, elapsed).map(|gui| {
-            gem.animate(elapsed);
-            coin.animate(elapsed);
             cat.animate(elapsed);
-
-            PlayerSelect {
-                gui,
-                cat,
-                coin,
-                gem,
-            }
+            let collect = collect.update(input, elapsed).get();
+            PlayerSelect { gui, cat, collect }
         })
     }
 }
 
 pub struct Assets<T> {
     title: Image<T>,
-    collect: Image<T>,
     avoid: Image<T>,
     instructions: Image<T>,
-    gem: Sprite<T>,
-    coin: Sprite<T>,
     cat: Sprite<T>,
+    collect: collect::Assets<T>,
     gui: gui::Assets<T>,
 }
 
 impl<T: Texture> NextScene<PlayerSelect, (), ()> for Assets<T> {
     fn next(mut self, world: &PlayerSelect, _: &(), _: &mut ()) -> Result<Self> {
-        self.gem.tile = world.gem.frame();
-        self.coin.tile = world.coin.frame();
         self.cat.tile = world.cat.frame();
+        self.collect = self.collect.next(&world.collect, &(), &mut ())?;
         self.gui = self.gui.next(&world.gui, &(), &mut ())?;
         Ok(self)
     }
@@ -95,27 +84,11 @@ impl<T: Texture> Assets<T> {
             .at(align::top(50).center(640));
 
         // Collect
-        let collect = font.texturize("Collect", &color)?
-            .at(align::top(400).center(960));
-        let collect_distance = 50;
-        let coin = {
-            let data = &data.coin;
-            let sheet = asset_manager.animation(&data.animation)?;
-            let pos = align::top(525).right(320 - collect_distance / 2);
-            let dst = data.out_size.dst(pos).scale(2);
-            Sprite::new(sheet, dst)
-        };
-        let gem = {
-            let data = &data.gem;
-            let sheet = asset_manager.animation(&data.animation)?;
-            let pos = align::top(525).left(320 + collect_distance / 2);
-            let dst = data.out_size.dst(pos).scale(2);
-            Sprite::new(sheet, dst)
-        };
+        let collect = collect::Assets::load(&*font, asset_manager, data)?;
 
         // Avoid
         let avoid = font.texturize("Avoid", &color)?
-            .at(align::top(400).center(320));
+            .at(align::top(400).center(960));
         let cat = {
             let data = &data.cat;
             let sheet = asset_manager.animation(&data.idle)?;
@@ -139,8 +112,6 @@ impl<T: Texture> Assets<T> {
             collect,
             avoid,
             instructions,
-            gem,
-            coin,
             cat,
             gui,
         })
@@ -153,8 +124,6 @@ impl<R: Renderer, T: Draw<R>> Show<R> for Assets<T> {
         renderer.show(&self.collect)?;
         renderer.show(&self.avoid)?;
         renderer.show(&self.instructions)?;
-        renderer.show(&self.gem)?;
-        renderer.show(&self.coin)?;
         renderer.show(&self.cat)?;
         renderer.show(&self.gui)
     }
