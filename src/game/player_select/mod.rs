@@ -1,15 +1,16 @@
 mod gui;
 mod collect;
+mod avoid;
 
 pub use self::gui::ButtonKind as PlayerKind;
 use self::gui::Gui;
 use self::collect::Collect;
+use self::avoid::Avoid;
 use data::{self, Animators};
 use game::{self, font};
-use asset::{self, Sprite};
+use asset;
 
 use moho::input;
-use moho::animation::animator::Animator;
 use moho::engine::{NextScene, World};
 use moho::errors::*;
 use moho::font::Font;
@@ -20,7 +21,7 @@ use std::time::Duration;
 
 pub struct PlayerSelect {
     collect: Collect,
-    cat: Animator,
+    avoid: Avoid,
     gui: Gui,
 }
 
@@ -28,7 +29,7 @@ impl PlayerSelect {
     pub fn new(animators: &Animators) -> Self {
         PlayerSelect {
             collect: Collect::new(animators),
-            cat: animators.cat_idle.start(),
+            avoid: Avoid::new(animators),
             gui: Gui::new(animators),
         }
     }
@@ -38,29 +39,32 @@ impl World for PlayerSelect {
     type Quit = PlayerKind;
 
     fn update(self, input: &input::State, elapsed: Duration) -> game::State<Self> {
-        let mut cat = self.cat;
+        let avoid = self.avoid;
         let collect = self.collect;
 
         self.gui.update(input, elapsed).map(|gui| {
-            cat.animate(elapsed);
             let collect = collect.update(input, elapsed).get();
-            PlayerSelect { gui, cat, collect }
+            let avoid = avoid.update(input, elapsed).get();
+            PlayerSelect {
+                gui,
+                avoid,
+                collect,
+            }
         })
     }
 }
 
 pub struct Assets<T> {
     title: Image<T>,
-    avoid: Image<T>,
     instructions: Image<T>,
-    cat: Sprite<T>,
+    avoid: avoid::Assets<T>,
     collect: collect::Assets<T>,
     gui: gui::Assets<T>,
 }
 
 impl<T: Texture> NextScene<PlayerSelect, (), ()> for Assets<T> {
     fn next(mut self, world: &PlayerSelect, _: &(), _: &mut ()) -> Result<Self> {
-        self.cat.tile = world.cat.frame();
+        self.avoid = self.avoid.next(&world.avoid, &(), &mut ())?;
         self.collect = self.collect.next(&world.collect, &(), &mut ())?;
         self.gui = self.gui.next(&world.gui, &(), &mut ())?;
         Ok(self)
@@ -83,19 +87,8 @@ impl<T: Texture> Assets<T> {
         let title = font.texturize("Select Player", &color)?
             .at(align::top(50).center(640));
 
-        // Collect
         let collect = collect::Assets::load(&*font, asset_manager, data)?;
-
-        // Avoid
-        let avoid = font.texturize("Avoid", &color)?
-            .at(align::top(400).center(960));
-        let cat = {
-            let data = &data.cat;
-            let sheet = asset_manager.animation(&data.idle)?;
-            let pos = align::center(960).top(500);
-            let dst = data.out_size.dst(pos).scale(2);
-            Sprite::new(sheet, dst)
-        };
+        let avoid = avoid::Assets::load(&*font, asset_manager, data)?;
 
         let instructions = {
             let font = font_manager.load(font::Kind::KenPixel, 32)?;
@@ -112,7 +105,6 @@ impl<T: Texture> Assets<T> {
             collect,
             avoid,
             instructions,
-            cat,
             gui,
         })
     }
@@ -124,7 +116,6 @@ impl<R: Renderer, T: Draw<R>> Show<R> for Assets<T> {
         renderer.show(&self.collect)?;
         renderer.show(&self.avoid)?;
         renderer.show(&self.instructions)?;
-        renderer.show(&self.cat)?;
         renderer.show(&self.gui)
     }
 }
