@@ -1,11 +1,9 @@
 mod gui;
-mod collect;
-mod avoid;
+mod guide;
 
 pub use self::gui::ButtonKind as PlayerKind;
 use self::gui::Gui;
-use self::collect::Collect;
-use self::avoid::Avoid;
+use self::guide::Guide;
 use data::{self, Animators};
 use game::{self, font};
 use asset;
@@ -20,16 +18,14 @@ use moho::renderer::{align, ColorRGBA, Draw, Renderer, Show};
 use std::time::Duration;
 
 pub struct PlayerSelect {
-    collect: Collect,
-    avoid: Avoid,
+    guide: Guide,
     gui: Gui,
 }
 
 impl PlayerSelect {
     pub fn new(animators: &Animators) -> Self {
         PlayerSelect {
-            collect: Collect::new(animators),
-            avoid: Avoid::new(animators),
+            guide: Guide::new(animators),
             gui: Gui::new(animators),
         }
     }
@@ -39,17 +35,11 @@ impl World for PlayerSelect {
     type Quit = PlayerKind;
 
     fn update(self, input: &input::State, elapsed: Duration) -> game::State<Self> {
-        let avoid = self.avoid;
-        let collect = self.collect;
+        let guide = self.guide;
 
         self.gui.update(input, elapsed).map(|gui| {
-            let collect = collect.update(input, elapsed).get();
-            let avoid = avoid.update(input, elapsed).get();
-            PlayerSelect {
-                gui,
-                avoid,
-                collect,
-            }
+            let guide = guide.update(input, elapsed).get();
+            PlayerSelect { gui, guide }
         })
     }
 }
@@ -57,15 +47,13 @@ impl World for PlayerSelect {
 pub struct Assets<T> {
     title: Image<T>,
     instructions: Image<T>,
-    avoid: avoid::Assets<T>,
-    collect: collect::Assets<T>,
+    guide: guide::Assets<T>,
     gui: gui::Assets<T>,
 }
 
 impl<T: Texture> NextScene<PlayerSelect, (), ()> for Assets<T> {
     fn next(mut self, world: &PlayerSelect, _: &(), _: &mut ()) -> Result<Self> {
-        self.avoid = self.avoid.next(&world.avoid, &(), &mut ())?;
-        self.collect = self.collect.next(&world.collect, &(), &mut ())?;
+        self.guide = self.guide.next(&world.guide, &(), &mut ())?;
         self.gui = self.gui.next(&world.gui, &(), &mut ())?;
         Ok(self)
     }
@@ -87,8 +75,7 @@ impl<T: Texture> Assets<T> {
         let title = font.texturize("Select Player", &color)?
             .at(align::top(50).center(640));
 
-        let collect = collect::Assets::load(&*font, asset_manager, data)?;
-        let avoid = avoid::Assets::load(&*font, asset_manager, data)?;
+        let guide = guide::Assets::load(&*font, asset_manager, data)?;
 
         let instructions = {
             let font = font_manager.load(font::Kind::KenPixel, 32)?;
@@ -102,8 +89,7 @@ impl<T: Texture> Assets<T> {
 
         Ok(Assets {
             title,
-            collect,
-            avoid,
+            guide,
             instructions,
             gui,
         })
@@ -113,8 +99,7 @@ impl<T: Texture> Assets<T> {
 impl<R: Renderer, T: Draw<R>> Show<R> for Assets<T> {
     fn show(&self, renderer: &mut R) -> Result<()> {
         renderer.show(&self.title)?;
-        renderer.show(&self.collect)?;
-        renderer.show(&self.avoid)?;
+        renderer.show(&self.guide)?;
         renderer.show(&self.instructions)?;
         renderer.show(&self.gui)
     }
