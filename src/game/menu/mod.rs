@@ -50,21 +50,15 @@ impl<T: Texture> Assets<T> {
     {
         let husky = {
             let pos = align::right(640 - 32 - 30).middle(125);
-            let mut image = asset_manager.image(asset::Texture::Husky, pos)?;
-            image.dst = image.dst.scale(2);
-            image
+            asset_manager.image(asset::Texture::Husky, pos)?.scale(2)
         };
         let duck = {
             let pos = align::left(640 + 32 + 30).middle(125);
-            let mut image = asset_manager.image(asset::Texture::Duck, pos)?;
-            image.dst = image.dst.scale(2);
-            image
+            asset_manager.image(asset::Texture::Duck, pos)?.scale(2)
         };
         let heart = {
             let pos = align::center(640).middle(125);
-            let mut image = asset_manager.image(asset::Texture::Heart, pos)?;
-            image.dst = image.dst.scale(2);
-            image
+            asset_manager.image(asset::Texture::Heart, pos)?.scale(2)
         };
         let instructions = {
             let font = asset_manager.font(asset::Font::KenPixel, 32)?;

@@ -130,15 +130,13 @@ impl<T: Texture> Assets<T> {
         let picker = asset_manager.texture(asset::Texture::Heart)?;
         let husky = {
             let pos = align::right(640 - distance / 2).bottom(300);
-            let mut image = asset_manager.image(asset::Texture::Husky, pos)?;
-            image.dst = image.dst.scale(2);
+            let mut image = asset_manager.image(asset::Texture::Husky, pos)?.scale(2);
             let sheet = asset_manager.sheet(asset::Animation::Husky)?;
             Button::Idle(image, sheet, picker.clone())
         };
         let duck = {
             let pos = align::left(640 + distance / 2).bottom(300);
-            let mut image = asset_manager.image(asset::Texture::Duck, pos)?;
-            image.dst = image.dst.scale(2);
+            let mut image = asset_manager.image(asset::Texture::Duck, pos)?.scale(2);
             let sheet = asset_manager.sheet(asset::Animation::Duck)?;
             Button::Idle(image, sheet, picker)
         };
