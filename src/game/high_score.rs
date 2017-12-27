@@ -61,7 +61,7 @@ impl<T: Texture> Assets<T> {
             let mut top = 150;
             let mut vec = Vec::with_capacity(scores.len());
             for s in scores {
-                let score = format!("{:06}{:5}{:>6}", s.score, "", s.name);
+                let score = format!("{:06}{:5}{:>6}", s.points, "", s.name);
                 let image = font.texturize(&score, &color)?.at(center.top(top));
                 top += image.dst.dims.y as i32;
                 vec.push(image);

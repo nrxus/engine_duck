@@ -1,9 +1,10 @@
-mod menu;
-mod high_score;
-mod player_select;
-mod screen;
-mod score_repository;
+mod game_play;
 mod helper;
+mod high_score;
+mod menu;
+mod player_select;
+mod score_repository;
+mod screen;
 
 use self::screen::Screen;
 use self::helper::Helper;

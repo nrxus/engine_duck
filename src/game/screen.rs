@@ -1,6 +1,7 @@
 use asset;
 use data::Animators;
 use game;
+use game::game_play::{self, GamePlay};
 use game::menu::{self, Menu};
 use game::high_score::{self, HighScore};
 use game::player_select::{self, PlayerSelect};
@@ -32,12 +33,14 @@ pub enum Kind {
     Menu(Menu),
     HighScore(HighScore),
     PlayerSelect(PlayerSelect),
+    GamePlay(GamePlay),
 }
 
 pub enum Assets<T> {
     Menu(menu::Assets<T>),
     HighScore(high_score::Assets<T>),
     PlayerSelect(player_select::Assets<T>),
+    GamePlay(game_play::Assets),
 }
 
 impl World for Screen {
@@ -59,7 +62,8 @@ impl World for Screen {
                 .flat_map_quit(|_| moho::State::Running(Kind::Menu(Menu::default()))),
             Kind::PlayerSelect(ps) => ps.update(input, elapsed)
                 .map(Kind::PlayerSelect)
-                .map_quit(|_| ()),
+                .flat_map_quit(|_| moho::State::Running(Kind::GamePlay(GamePlay::new()))),
+            Kind::GamePlay(gp) => gp.update(input, elapsed).map(Kind::GamePlay),
         };
         current.map(|current| Screen { current, animators })
     }
@@ -76,6 +80,7 @@ impl<T: Texture> Assets<T> {
             Kind::PlayerSelect(_) => {
                 player_select::Assets::load(asset_manager).map(Assets::PlayerSelect)
             }
+            Kind::GamePlay(_) => game_play::Assets::load().map(Assets::GamePlay),
         }
     }
 }
@@ -95,6 +100,10 @@ impl<AM: asset::Manager> NextScene<Screen, fixed::State, AM> for Assets<AM::Text
                 Assets::PlayerSelect(ps) => ps.next(world, &(), &mut ()).map(Assets::PlayerSelect),
                 _ => Assets::load(screen, helper),
             },
+            Kind::GamePlay(ref world) => match self {
+                Assets::GamePlay(ps) => ps.next(world, &(), &mut ()).map(Assets::GamePlay),
+                _ => Assets::load(screen, helper),
+            },
         }
     }
 }
@@ -105,6 +114,7 @@ impl<R: Renderer, T: Draw<R> + Texture> Show<R> for Assets<T> {
             Assets::Menu(ref m) => renderer.show(m),
             Assets::HighScore(ref hs) => renderer.show(hs),
             Assets::PlayerSelect(ref ps) => renderer.show(ps),
+            Assets::GamePlay(ref gp) => renderer.show(gp),
         }
     }
 }
