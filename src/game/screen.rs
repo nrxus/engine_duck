@@ -6,7 +6,7 @@ use game::menu::{self, Menu};
 use game::high_score::{self, HighScore};
 use game::player_select::{self, PlayerSelect};
 
-use moho::{self, input};
+use moho::{self, input, Never};
 use moho::errors::*;
 use moho::engine::{NextScene, World};
 use moho::engine::step::fixed;
@@ -44,28 +44,28 @@ pub enum Assets<T> {
 }
 
 impl World for Screen {
-    type Quit = ();
+    type Quit = Never;
 
     fn update(self, input: &input::State, elapsed: Duration) -> game::State<Self> {
         let animators = self.animators;
         let current = match self.current {
             Kind::Menu(m) => m.update(input, elapsed)
                 .map(Kind::Menu)
-                .flat_map_quit(|b| match b {
-                    menu::Quit::NewGame => {
-                        moho::State::Running(Kind::PlayerSelect(PlayerSelect::new(&animators)))
-                    }
-                    menu::Quit::HighScore => moho::State::Running(Kind::HighScore(HighScore {})),
+                .catch_quit(|b| match b {
+                    menu::Quit::NewGame => Kind::PlayerSelect(PlayerSelect::new(&animators)),
+                    menu::Quit::HighScore => Kind::HighScore(HighScore {}),
                 }),
             Kind::HighScore(hs) => hs.update(input, elapsed)
                 .map(Kind::HighScore)
-                .flat_map_quit(|_| moho::State::Running(Kind::Menu(Menu::default()))),
+                .catch_quit(|_| Kind::Menu(Menu::default())),
             Kind::PlayerSelect(ps) => ps.update(input, elapsed)
                 .map(Kind::PlayerSelect)
-                .flat_map_quit(|_| moho::State::Running(Kind::GamePlay(GamePlay::new()))),
-            Kind::GamePlay(gp) => gp.update(input, elapsed).map(Kind::GamePlay),
+                .catch_quit(|_| Kind::GamePlay(GamePlay::new())),
+            Kind::GamePlay(gp) => gp.update(input, elapsed)
+                .map(Kind::GamePlay)
+                .catch_quit(|_| Kind::Menu(Menu::default())),
         };
-        current.map(|current| Screen { current, animators })
+        moho::State::Running(Screen { current, animators })
     }
 }
 

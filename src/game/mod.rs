@@ -65,6 +65,7 @@ impl engine::World for World {
         self.screen
             .update(input, elapsed)
             .map(|screen| World { screen })
+            .map_quit(|_| ())
     }
 }
 
