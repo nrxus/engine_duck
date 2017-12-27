@@ -4,8 +4,8 @@ mod guide;
 pub use self::gui::ButtonKind as PlayerKind;
 use self::gui::Gui;
 use self::guide::Guide;
-use data::{self, Animators};
-use game::{self, font};
+use data::Animators;
+use game;
 use asset;
 
 use moho::input;
@@ -60,32 +60,27 @@ impl<T: Texture> NextScene<PlayerSelect, (), ()> for Assets<T> {
 }
 
 impl<T: Texture> Assets<T> {
-    pub fn load<FM, AM>(
-        font_manager: &mut FM,
-        asset_manager: &mut AM,
-        data: &data::Game,
-    ) -> Result<Self>
+    pub fn load<AM>(asset_manager: &mut AM) -> Result<Self>
     where
-        FM: font::Manager<Texture = T>,
         AM: asset::Manager<Texture = T>,
     {
         let color = ColorRGBA(255, 255, 0, 255);
 
-        let font = font_manager.load(font::Kind::KenPixel, 64)?;
+        let font = asset_manager.font(asset::Font::KenPixel, 64)?;
         let title = font.texturize("Select Player", &color)?
             .at(align::top(50).center(640));
 
-        let guide = guide::Assets::load(&*font, asset_manager, data)?;
+        let guide = guide::Assets::load(&*font, asset_manager)?;
 
         let instructions = {
-            let font = font_manager.load(font::Kind::KenPixel, 32)?;
+            let font = asset_manager.font(asset::Font::KenPixel, 32)?;
             let text = "<Use Arrow Keys to choose player; then press Enter>";
             let height = font.measure(text)?.y as i32;
             font.texturize(text, &color)?
                 .at(align::bottom(720 - height).center(640))
         };
 
-        let gui = gui::Assets::load(asset_manager, data)?;
+        let gui = gui::Assets::load(asset_manager)?;
 
         Ok(Assets {
             title,

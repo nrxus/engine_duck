@@ -3,13 +3,12 @@ mod gui;
 pub use self::gui::Quit;
 use self::gui::Gui;
 use asset;
-use data;
-use game::{self, font};
+use game;
 
 use moho::input;
+use moho::font::Font;
 use moho::errors::*;
 use moho::engine::{NextScene, World};
-use moho::font::Font;
 use moho::texture::{Image, Texture};
 use moho::renderer::{align, ColorRGBA, Draw, Renderer, Show};
 
@@ -45,39 +44,30 @@ pub struct Assets<T> {
 }
 
 impl<T: Texture> Assets<T> {
-    pub fn load<FM, AM>(
-        font_manager: &mut FM,
-        texture_manager: &mut AM,
-        data: &data::Game,
-        menu: &Menu,
-    ) -> Result<Self>
+    pub fn load<AM>(asset_manager: &mut AM, menu: &Menu) -> Result<Self>
     where
-        FM: font::Manager<Texture = T>,
         AM: asset::Manager<Texture = T>,
     {
         let husky = {
             let pos = align::right(640 - 32 - 30).middle(125);
-            let player = &data.husky;
-            let texture = texture_manager.texture(&player.idle_texture)?;
-            let dst = player.out_size.dst(pos).scale(2);
-            Image { texture, dst }
+            let mut image = asset_manager.image(asset::Texture::Husky, pos)?;
+            image.dst = image.dst.scale(2);
+            image
         };
         let duck = {
             let pos = align::left(640 + 32 + 30).middle(125);
-            let player = &data.duck;
-            let texture = texture_manager.texture(&player.idle_texture)?;
-            let dst = player.out_size.dst(pos).scale(2);
-            Image { texture, dst }
+            let mut image = asset_manager.image(asset::Texture::Duck, pos)?;
+            image.dst = image.dst.scale(2);
+            image
         };
         let heart = {
             let pos = align::center(640).middle(125);
-            let data = &data.heart;
-            let texture = texture_manager.texture(&data.texture)?;
-            let dst = data.out_size.dst(pos).scale(2);
-            Image { texture, dst }
+            let mut image = asset_manager.image(asset::Texture::Heart, pos)?;
+            image.dst = image.dst.scale(2);
+            image
         };
         let instructions = {
-            let font = font_manager.load(font::Kind::KenPixel, 32)?;
+            let font = asset_manager.font(asset::Font::KenPixel, 32)?;
             let color = ColorRGBA(255, 255, 0, 255);
             let text = "<Use Arrow Keys to select option; then press Enter>";
             let texture = font.texturize(text, &color).map(Rc::new)?;
@@ -86,8 +76,8 @@ impl<T: Texture> Assets<T> {
             Image { texture, dst }
         };
         let gui = {
-            let picker = texture_manager.texture(&data.heart.texture)?;
-            let font = font_manager.load(font::Kind::KenPixel, 64)?;
+            let picker = asset_manager.texture(asset::Texture::Heart)?;
+            let font = asset_manager.font(asset::Font::KenPixel, 64)?;
             gui::Assets::load(&*font, picker, &menu.gui)
         }?;
 

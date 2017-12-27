@@ -1,4 +1,5 @@
-use game::{self, font};
+use asset;
+use game;
 
 use moho::{self, input};
 use moho::engine::World;
@@ -31,29 +32,29 @@ pub struct Assets<T> {
 }
 
 impl<T: Texture> Assets<T> {
-    pub fn load<FM>(font_manager: &mut FM) -> Result<Self>
+    pub fn load<AM>(asset_manager: &mut AM) -> Result<Self>
     where
-        FM: font::Manager<Texture = T>,
+        AM: asset::Manager<Texture = T>,
     {
         let color = ColorRGBA(255, 255, 0, 255);
         let center = align::center(640);
 
         let title = {
             let text = "High Scores";
-            let font = font_manager.load(font::Kind::KenPixel, 64)?;
+            let font = asset_manager.font(asset::Font::KenPixel, 64)?;
             font.texturize(text, &color)?.at(center.top(0))
         };
 
         let instructions = {
             let text = "<PRESS ENTER TO GO TO MAIN MENU>";
-            let font = font_manager.load(font::Kind::KenPixel, 32)?;
+            let font = asset_manager.font(asset::Font::KenPixel, 32)?;
             let height = font.measure(text)?.y as i32;
             font.texturize(text, &color)?
                 .at(center.bottom(720 - height))
         };
 
         let scores = {
-            let font = font_manager.load(font::Kind::Joystix, 32)?;
+            let font = asset_manager.font(asset::Font::Joystix, 32)?;
             let color = ColorRGBA(255, 255, 255, 255);
             let scores: Vec<_> = super::score_repository::get();
 

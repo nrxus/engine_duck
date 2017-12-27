@@ -130,7 +130,7 @@ impl From<Dimension> for glm::DVec2 {
 }
 
 impl Dimension {
-    pub fn dst(self, pos: Position) -> Destination {
+    pub fn at(self, pos: Position) -> Destination {
         pos.dims(self.into())
     }
 }

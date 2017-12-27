@@ -1,6 +1,6 @@
 use asset;
 use data::Animators;
-use game::{self, font, Helper};
+use game;
 use game::menu::{self, Menu};
 use game::high_score::{self, HighScore};
 use game::player_select::{self, PlayerSelect};
@@ -66,32 +66,22 @@ impl World for Screen {
 }
 
 impl<T: Texture> Assets<T> {
-    pub fn load<FM, AM>(world: &Screen, helper: &mut Helper<FM, AM>) -> Result<Self>
+    pub fn load<AM>(world: &Screen, asset_manager: &mut AM) -> Result<Self>
     where
-        FM: font::Manager<Texture = T>,
         AM: asset::Manager<Texture = T>,
     {
-        let font_manager = &mut helper.font_manager;
-        let asset_manager = &mut helper.asset_manager;
-        let data = &helper.data;
-
         match world.current {
-            Kind::Menu(ref m) => {
-                menu::Assets::load(font_manager, asset_manager, data, m).map(Assets::Menu)
+            Kind::Menu(ref m) => menu::Assets::load(asset_manager, m).map(Assets::Menu),
+            Kind::HighScore(_) => high_score::Assets::load(asset_manager).map(Assets::HighScore),
+            Kind::PlayerSelect(_) => {
+                player_select::Assets::load(asset_manager).map(Assets::PlayerSelect)
             }
-            Kind::HighScore(_) => high_score::Assets::load(font_manager).map(Assets::HighScore),
-            Kind::PlayerSelect(_) => player_select::Assets::load(font_manager, asset_manager, data)
-                .map(Assets::PlayerSelect),
         }
     }
 }
 
-impl<FM, AM> NextScene<Screen, fixed::State, Helper<FM, AM>> for Assets<AM::Texture>
-where
-    AM: asset::Manager,
-    FM: font::Manager<Texture = AM::Texture>,
-{
-    fn next(self, screen: &Screen, _: &fixed::State, helper: &mut Helper<FM, AM>) -> Result<Self> {
+impl<AM: asset::Manager> NextScene<Screen, fixed::State, AM> for Assets<AM::Texture> {
+    fn next(self, screen: &Screen, _: &fixed::State, helper: &mut AM) -> Result<Self> {
         match screen.current {
             Kind::Menu(ref world) => match self {
                 Assets::Menu(m) => m.next(world, &(), &mut ()).map(Assets::Menu),

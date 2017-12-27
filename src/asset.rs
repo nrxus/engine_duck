@@ -2,9 +2,10 @@ use data;
 
 use moho::animation::TileSheet;
 use moho::errors::*;
-use moho::renderer::options::{self, Destination, Options};
+use moho::renderer::options::{self, Destination, Options, Position};
 use moho::renderer::{Draw, Renderer, Show};
-use moho::texture::{self, Texture};
+use moho::texture::{self, Image};
+use moho::font;
 
 use std::rc::Rc;
 
@@ -22,6 +23,11 @@ impl<T> Sprite<T> {
             tile: 0,
         }
     }
+
+    pub fn scale(mut self, scale: u32) -> Self {
+        self.dst = self.dst.scale(scale);
+        self
+    }
 }
 
 impl<R: Renderer, T: Draw<R>> Show<R> for Sprite<T> {
@@ -37,27 +43,88 @@ impl<R: Renderer, T: Draw<R>> Draw<R> for Sprite<T> {
 }
 
 pub trait Manager {
-    type Texture: Texture;
+    type Texture: texture::Texture;
+    type Font: font::Font<Texture = Self::Texture>;
 
-    fn texture(&mut self, texture: &data::Texture) -> Result<Rc<Self::Texture>>;
-    fn animation(&mut self, animation: &data::Animation) -> Result<TileSheet<Self::Texture>>;
+    fn texture(&mut self, texture: Texture) -> Result<Rc<Self::Texture>>;
+    fn sheet(&mut self, animation: Animation) -> Result<TileSheet<Self::Texture>>;
+    fn image(&mut self, texture: Texture, pos: Position) -> Result<Image<Self::Texture>>;
+    fn sprite(&mut self, animaiton: Animation, pos: Position) -> Result<Sprite<Self::Texture>>;
+    fn font(&mut self, font: Font, size: u16) -> Result<Rc<Self::Font>>;
 }
 
-impl<'t, TL> Manager for texture::Manager<'t, TL>
-where
-    TL: texture::Loader<'t>,
-    TL::Texture: Texture,
-    Error: From<TL::Error>,
-{
-    type Texture = TL::Texture;
+#[derive(Clone, Copy)]
+pub enum Texture {
+    Husky,
+    Duck,
+    Heart,
+}
 
-    fn texture(&mut self, texture: &data::Texture) -> Result<Rc<Self::Texture>> {
-        self.load(&format!("media/sprites/{}", texture.0))
-            .map_err(Into::into)
+#[derive(Clone, Copy)]
+pub enum Animation {
+    Husky,
+    Duck,
+    Coin,
+    Gem,
+    IdleCat,
+}
+
+#[derive(Clone, Copy)]
+pub enum Font {
+    KenPixel,
+    Joystix,
+}
+
+impl Font {
+    pub fn path(&self) -> &'static str {
+        match *self {
+            Font::KenPixel => "media/fonts/kenpixel_mini.ttf",
+            Font::Joystix => "media/fonts/joystix.monospace.ttf",
+        }
+    }
+}
+
+pub struct TextureData<'t> {
+    pub texture: &'t str,
+    pub dims: data::Dimension,
+}
+
+pub struct AnimationData<'t> {
+    pub texture: &'t str,
+    pub dims: data::Dimension,
+    pub tiles: data::Dimension,
+}
+
+impl data::Game {
+    pub fn texture<'t>(&'t self, texture: Texture) -> TextureData<'t> {
+        match texture {
+            Texture::Husky => TextureData {
+                texture: &self.husky.idle_texture.0,
+                dims: self.husky.out_size,
+            },
+            Texture::Duck => TextureData {
+                texture: &self.duck.idle_texture.0,
+                dims: self.duck.out_size,
+            },
+            Texture::Heart => TextureData {
+                texture: &self.heart.texture.0,
+                dims: self.heart.out_size,
+            },
+        }
     }
 
-    fn animation(&mut self, animation: &data::Animation) -> Result<TileSheet<Self::Texture>> {
-        self.texture(&animation.texture)
-            .map(|t| TileSheet::new(animation.tiles.into(), t))
+    pub fn animation<'t>(&'t self, animation: Animation) -> AnimationData<'t> {
+        let (dims, animation) = match animation {
+            Animation::Husky => (self.husky.out_size, &self.husky.animation),
+            Animation::Duck => (self.duck.out_size, &self.duck.animation),
+            Animation::Coin => (self.coin.out_size, &self.coin.animation),
+            Animation::Gem => (self.gem.out_size, &self.gem.animation),
+            Animation::IdleCat => (self.cat.out_size, &self.cat.idle),
+        };
+        AnimationData {
+            dims,
+            texture: &animation.texture.0,
+            tiles: animation.tiles,
+        }
     }
 }

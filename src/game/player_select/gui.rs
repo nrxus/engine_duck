@@ -1,5 +1,5 @@
 use asset::{self, Sprite};
-use data::{self, Animators};
+use data::Animators;
 use game;
 
 use moho::animation::animator::{self, Animator};
@@ -122,28 +122,24 @@ pub struct Assets<T> {
 }
 
 impl<T: Texture> Assets<T> {
-    pub fn load<AM>(asset_manager: &mut AM, data: &data::Game) -> Result<Self>
+    pub fn load<AM>(asset_manager: &mut AM) -> Result<Self>
     where
         AM: asset::Manager<Texture = T>,
     {
         let distance = 50;
-        let picker = asset_manager.texture(&data.heart.texture)?;
+        let picker = asset_manager.texture(asset::Texture::Heart)?;
         let husky = {
-            let data = &data.husky;
-            let texture = asset_manager.texture(&data.idle_texture)?;
             let pos = align::right(640 - distance / 2).bottom(300);
-            let dst = data.out_size.dst(pos).scale(2);
-            let image = Image { texture, dst };
-            let sheet = asset_manager.animation(&data.animation)?;
+            let mut image = asset_manager.image(asset::Texture::Husky, pos)?;
+            image.dst = image.dst.scale(2);
+            let sheet = asset_manager.sheet(asset::Animation::Husky)?;
             Button::Idle(image, sheet, picker.clone())
         };
         let duck = {
-            let data = &data.duck;
-            let texture = asset_manager.texture(&data.idle_texture)?;
             let pos = align::left(640 + distance / 2).bottom(300);
-            let dst = data.out_size.dst(pos).scale(2);
-            let image = Image { texture, dst };
-            let sheet = asset_manager.animation(&data.animation)?;
+            let mut image = asset_manager.image(asset::Texture::Duck, pos)?;
+            image.dst = image.dst.scale(2);
+            let sheet = asset_manager.sheet(asset::Animation::Duck)?;
             Button::Idle(image, sheet, picker)
         };
         Ok(Self { duck, husky })

@@ -1,5 +1,5 @@
 use asset::{self, Sprite};
-use data::{self, Animators};
+use data::Animators;
 use game;
 
 use moho::{self, input};
@@ -48,7 +48,7 @@ pub struct Assets<T> {
 }
 
 impl<T: Texture> Assets<T> {
-    pub fn load<F, AM>(font: &F, asset_manager: &mut AM, data: &data::Game) -> Result<Self>
+    pub fn load<F, AM>(font: &F, asset_manager: &mut AM) -> Result<Self>
     where
         F: Font<Texture = T>,
         AM: asset::Manager<Texture = T>,
@@ -60,28 +60,22 @@ impl<T: Texture> Assets<T> {
             .at(align::top(400).center(320));
         let distance = 50;
         let coin = {
-            let data = &data.coin;
-            let sheet = asset_manager.animation(&data.animation)?;
             let pos = align::top(525).right(320 - distance / 2);
-            let dst = data.out_size.dst(pos).scale(2);
-            Sprite::new(sheet, dst)
+            asset_manager.sprite(asset::Animation::Coin, pos)?.scale(2)
         };
         let gem = {
-            let data = &data.gem;
-            let sheet = asset_manager.animation(&data.animation)?;
             let pos = align::top(525).left(320 + distance / 2);
-            let dst = data.out_size.dst(pos).scale(2);
-            Sprite::new(sheet, dst)
+            asset_manager.sprite(asset::Animation::Gem, pos)?.scale(2)
         };
 
         //Avoid
         let avoid = font.texturize("Avoid", &color)?
             .at(align::top(400).center(960));
         let cat = {
-            let data = &data.cat;
-            let sheet = asset_manager.animation(&data.idle)?;
-            let dst = data.out_size.dst(align::top(500).center(960)).scale(2);
-            Sprite::new(sheet, dst)
+            let pos = align::top(500).center(960);
+            asset_manager
+                .sprite(asset::Animation::IdleCat, pos)?
+                .scale(2)
         };
         Ok(Assets {
             collect,

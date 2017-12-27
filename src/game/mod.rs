@@ -1,11 +1,12 @@
 mod menu;
 mod high_score;
 mod player_select;
-mod font;
 mod screen;
 mod score_repository;
+mod helper;
 
 use self::screen::Screen;
+use self::helper::Helper;
 use asset;
 use data;
 use errors::*;
@@ -36,14 +37,14 @@ where
     moho::errors::Error: From<Err> + From<FL::Error>,
 {
     let font_manager = moho::font::Manager::new(font_loader);
-    let asset_manager = texture::Manager::new(texture_loader);
+    let texture_manager = texture::Manager::new(texture_loader);
     let data = data::Game::load("media/game_data.yaml")?;
     let world = World {
         screen: Screen::new(data.animators()),
     };
     let mut helper = Helper {
         font_manager,
-        asset_manager,
+        texture_manager,
         data,
     };
     let scene = Assets::load(&world, &mut helper)?;
@@ -66,16 +67,12 @@ impl engine::World for World {
     }
 }
 
-impl<FM, AM> NextScene<World, fixed::State, Helper<FM, AM>> for Assets<AM::Texture>
-where
-    AM: asset::Manager,
-    FM: font::Manager<Texture = AM::Texture>,
-{
+impl<AM: asset::Manager> NextScene<World, fixed::State, AM> for Assets<AM::Texture> {
     fn next(
         self,
         game: &World,
         step: &fixed::State,
-        helper: &mut Helper<FM, AM>,
+        helper: &mut AM,
     ) -> moho::errors::Result<Self> {
         self.screen
             .next(&game.screen, step, helper)
@@ -83,21 +80,14 @@ where
     }
 }
 
-pub struct Helper<FM, AM> {
-    font_manager: FM,
-    asset_manager: AM,
-    data: data::Game,
-}
-
 pub struct Assets<T> {
     screen: screen::Assets<T>,
 }
 
 impl<T: Texture> Assets<T> {
-    fn load<'t, FM, AM>(world: &World, helper: &mut Helper<FM, AM>) -> moho::errors::Result<Self>
+    fn load<AM>(world: &World, helper: &mut AM) -> moho::errors::Result<Self>
     where
         AM: asset::Manager<Texture = T>,
-        FM: font::Manager<Texture = T>,
     {
         screen::Assets::load(&world.screen, helper).map(|screen| Assets { screen })
     }
