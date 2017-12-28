@@ -25,8 +25,8 @@ impl GamePlay {
 impl World for GamePlay {
     type Quit = ();
 
-    fn update(self, input: &input::State, elapsed: Duration) -> game::State<Self> {
-        self.hud.update(input, elapsed).map(|hud| GamePlay { hud })
+    fn update(self, _: &input::State, elapsed: Duration) -> game::State<Self> {
+        self.hud.update(0, elapsed).map(|hud| GamePlay { hud })
     }
 }
 

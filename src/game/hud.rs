@@ -1,9 +1,9 @@
-use {asset, game};
+use asset;
 use game::text::{self, Text};
 
-use moho::{self, input};
+use moho;
 use moho::font::Font;
-use moho::engine::{NextScene, World};
+use moho::engine::NextScene;
 use moho::errors::*;
 use moho::renderer::{align, options, Draw, Renderer, Show};
 use moho::texture::Texture;
@@ -13,22 +13,27 @@ use std::rc::Rc;
 
 pub struct Hud {
     timer: Duration,
+    score: u32,
 }
 
 impl Default for Hud {
     fn default() -> Self {
         Hud {
             timer: Duration::from_secs(3),
+            score: 0,
         }
     }
 }
 
-impl World for Hud {
-    type Quit = ();
-
-    fn update(self, _: &input::State, elapsed: Duration) -> game::State<Self> {
+impl Hud {
+    pub fn update(self, scored: i32, elapsed: Duration) -> moho::State<Self, ()> {
+        let score = if scored >= 0 {
+            self.score + scored as u32
+        } else {
+            self.score.checked_sub(scored.abs() as u32).unwrap_or(0)
+        };
         match self.timer.checked_sub(elapsed) {
-            Some(timer) => moho::State::Running(Hud { timer }),
+            Some(timer) => moho::State::Running(Hud { timer, score }),
             None => moho::State::Quit(()),
         }
     }
@@ -41,8 +46,17 @@ impl text::Cached for Duration {
     }
 }
 
+impl text::Cached for u32 {
+    type Value = u32;
+
+    fn cached(&self) -> u32 {
+        *self
+    }
+}
+
 pub struct Assets<T, F> {
     timer: Text<T, F, Duration>,
+    score: Text<T, F, u32>,
 }
 
 impl<T, F: Font<Texture = T>> NextScene<Hud, (), ()> for Assets<T, F> {
@@ -60,6 +74,7 @@ impl<T: Texture, F: Font<Texture = T>> Assets<T, F> {
         let font = asset_manager.font(asset::Font::KenPixel, 32)?;
         Ok(Assets {
             timer: Text::load(world.timer, Rc::clone(&font), |v| format!("Time: {:03}", v))?,
+            score: Text::load(world.score, font, |v| format!("Score: {:05}", v))?,
         })
     }
 }
@@ -69,6 +84,10 @@ impl<R: Renderer, T: Draw<R> + Texture, F> Show<R> for Assets<T, F> {
         renderer.draw(
             &self.timer,
             options::at(align::top(0).center(960).dims(self.timer.dims())),
+        )?;
+        renderer.draw(
+            &self.score,
+            options::at(align::top(0).center(320).dims(self.score.dims())),
         )
     }
 }
