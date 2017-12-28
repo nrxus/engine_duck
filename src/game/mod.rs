@@ -1,10 +1,12 @@
 mod game_play;
 mod helper;
 mod high_score;
+mod hud;
 mod menu;
 mod player_select;
 mod score_repository;
 mod screen;
+mod text;
 
 use self::screen::Screen;
 use self::helper::Helper;
@@ -15,6 +17,7 @@ use errors::*;
 use moho::{self, input};
 use moho::engine::{self, Engine, NextScene};
 use moho::engine::step::fixed;
+use moho::font::Font;
 use moho::renderer::{self, ColorRGBA, Draw, Renderer};
 use moho::texture::{self, Texture};
 
@@ -49,9 +52,7 @@ where
         data,
     };
     let scene = Assets::load(&world, &mut helper)?;
-    engine
-        .run::<Assets<TL::Texture>, _, _>(world, scene, helper)
-        .map_err(Into::into)
+    engine.run(world, scene, helper).map_err(Into::into)
 }
 
 pub struct World {
@@ -69,7 +70,7 @@ impl engine::World for World {
     }
 }
 
-impl<AM: asset::Manager> NextScene<World, fixed::State, AM> for Assets<AM::Texture> {
+impl<AM: asset::Manager> NextScene<World, fixed::State, AM> for Assets<AM::Texture, AM::Font> {
     fn next(
         self,
         game: &World,
@@ -82,20 +83,20 @@ impl<AM: asset::Manager> NextScene<World, fixed::State, AM> for Assets<AM::Textu
     }
 }
 
-pub struct Assets<T> {
-    screen: screen::Assets<T>,
+pub struct Assets<T, F> {
+    screen: screen::Assets<T, F>,
 }
 
-impl<T: Texture> Assets<T> {
+impl<T: Texture, F: Font<Texture = T>> Assets<T, F> {
     fn load<AM>(world: &World, helper: &mut AM) -> moho::errors::Result<Self>
     where
-        AM: asset::Manager<Texture = T>,
+        AM: asset::Manager<Texture = T, Font = F>,
     {
         screen::Assets::load(&world.screen, helper).map(|screen| Assets { screen })
     }
 }
 
-impl<R: Renderer, T: Texture + Draw<R>> renderer::Show<R> for Assets<T> {
+impl<R: Renderer, T: Texture + Draw<R>, F> renderer::Show<R> for Assets<T, F> {
     fn show(&self, renderer: &mut R) -> moho::errors::Result<()> {
         renderer.show(&self.screen)?;
         //reset to the background color

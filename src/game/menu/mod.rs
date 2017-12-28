@@ -44,7 +44,7 @@ pub struct Assets<T> {
 }
 
 impl<T: Texture> Assets<T> {
-    pub fn load<AM>(asset_manager: &mut AM, menu: &Menu) -> Result<Self>
+    pub fn load<AM>(menu: &Menu, asset_manager: &mut AM) -> Result<Self>
     where
         AM: asset::Manager<Texture = T>,
     {
