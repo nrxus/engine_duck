@@ -1,6 +1,7 @@
 use asset;
 use game::{self, game_play};
 
+use glm;
 use moho::{self, input};
 use moho::engine::World;
 use moho::errors::*;
@@ -8,6 +9,7 @@ use moho::renderer::{align, ColorRGBA, Draw, Renderer, Show};
 use moho::font::Font;
 use moho::texture::{Image, Texture};
 use sdl2::keyboard::Keycode;
+use sdl2::rect::Rect;
 
 use std::time::Duration;
 
@@ -50,6 +52,23 @@ impl<T: Texture, F> Assets<T, F> {
 impl<R: Renderer, T: Draw<R> + Texture, F> Show<R> for Assets<T, F> {
     fn show(&self, renderer: &mut R) -> Result<()> {
         renderer.show(&self.game)?;
+        {
+            let (x, y) = (1080, 360);
+            let view = glm::ivec4(640 - x / 2, 360 - y / 2, x, y);
+            //border
+            renderer.set_draw_color(ColorRGBA(0, 0, 0, 255));
+            renderer.fill_rects(&[Rect::new(view.x, view.y, view.z as u32, view.w as u32)])?;
+            //background
+            renderer.set_draw_color(ColorRGBA(60, 0, 70, 255));
+            renderer.fill_rects(&[
+                Rect::new(
+                    view.x + 6,
+                    view.y + 6,
+                    view.z as u32 - 12,
+                    view.w as u32 - 12,
+                ),
+            ])?;
+        }
         renderer.show(&self.alert)?;
         renderer.show(&self.instructions)
     }
