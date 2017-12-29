@@ -10,9 +10,7 @@ mod text;
 
 use self::screen::Screen;
 use self::helper::Helper;
-use asset;
-use data;
-use errors::*;
+use {asset, data, Result};
 
 use moho::{self, input};
 use moho::engine::{self, Engine, NextScene};
@@ -21,12 +19,11 @@ use moho::font::Font;
 use moho::renderer::{self, ColorRGBA, Draw, Renderer};
 use moho::texture::{self, Texture};
 
-use std::error;
 use std::time::Duration;
 
 type State<W> = moho::State<W, <W as engine::World>::Quit>;
 
-pub fn run<'t, 'f, E, C, FL, TL, T, Err: error::Error>(
+pub fn run<'t, 'f, E, C, FL, TL, T>(
     engine: &mut Engine<E, C, fixed::FixedUpdate>,
     texture_loader: &'t TL,
     font_loader: &'f FL,
@@ -37,8 +34,7 @@ where
     C: renderer::Canvas,
     FL: moho::font::Loader<'f>,
     FL::Font: moho::font::Font<Texture = T>,
-    TL: texture::Loader<'t, Texture = T, Error = Err>,
-    moho::errors::Error: From<Err> + From<FL::Error>,
+    TL: texture::Loader<'t, Texture = T>,
 {
     let font_manager = moho::font::Manager::new(font_loader);
     let texture_manager = texture::Manager::new(texture_loader);
@@ -82,12 +78,7 @@ impl engine::World for World {
 }
 
 impl<AM: asset::Manager> NextScene<World, fixed::State, AM> for Assets<AM::Texture, AM::Font> {
-    fn next(
-        self,
-        game: &World,
-        step: &fixed::State,
-        helper: &mut AM,
-    ) -> moho::errors::Result<Self> {
+    fn next(self, game: &World, step: &fixed::State, helper: &mut AM) -> Result<Self> {
         self.screen
             .next(&game.screen, step, helper)
             .map(|screen| Assets { screen })
@@ -99,7 +90,7 @@ pub struct Assets<T, F> {
 }
 
 impl<T: Texture, F: Font<Texture = T>> Assets<T, F> {
-    fn load<AM>(world: &World, helper: &mut AM) -> moho::errors::Result<Self>
+    fn load<AM>(world: &World, helper: &mut AM) -> Result<Self>
     where
         AM: asset::Manager<Texture = T, Font = F>,
     {
@@ -108,7 +99,7 @@ impl<T: Texture, F: Font<Texture = T>> Assets<T, F> {
 }
 
 impl<R: Renderer, T: Texture + Draw<R>, F> renderer::Show<R> for Assets<T, F> {
-    fn show(&self, renderer: &mut R) -> moho::errors::Result<()> {
+    fn show(&self, renderer: &mut R) -> Result<()> {
         renderer.show(&self.screen)?;
         //reset to the background color
         let color = ColorRGBA(60, 0, 70, 255);

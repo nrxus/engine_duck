@@ -1,7 +1,6 @@
-use data;
+use {data, Result};
 
 use moho::animation::TileSheet;
-use moho::errors::*;
 use moho::renderer::options::{self, Destination, Options, Position};
 use moho::renderer::{Draw, Renderer, Show};
 use moho::texture::{self, Image};

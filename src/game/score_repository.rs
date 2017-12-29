@@ -1,5 +1,6 @@
-use errors::*;
+use Result;
 
+use failure::Error;
 use serde_yaml;
 
 use std::fs::File;
@@ -14,7 +15,7 @@ pub struct Score {
 
 pub fn get() -> Vec<Score> {
     File::open(PATH)
-        .chain_err(|| "")
+        .map_err(Error::from)
         .and_then(|f| serde_yaml::from_reader(f).map_err(Into::into))
         .unwrap_or_default()
 }

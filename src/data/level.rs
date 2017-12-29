@@ -1,5 +1,5 @@
-use errors::*;
 use super::Dimension;
+use Result;
 
 use serde_yaml;
 

@@ -1,9 +1,8 @@
 use asset::{self, Animation, Font, Sprite, Texture};
-use data;
+use {data, Result};
 
 use moho::{font, texture};
 use moho::animation::TileSheet;
-use moho::errors::*;
 use moho::renderer::options::Position;
 use moho::texture::Image;
 
@@ -25,7 +24,6 @@ where
     TL::Texture: texture::Texture,
     FL: font::Loader<'f> + 'f,
     FL::Font: font::Font<Texture = TL::Texture>,
-    Error: From<TL::Error> + From<FL::Error>,
 {
     type Texture = TL::Texture;
     type Font = FL::Font;

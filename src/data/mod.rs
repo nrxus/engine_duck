@@ -1,8 +1,7 @@
 mod level;
 
 pub use self::level::{CatKind, GroundKind, Level, Obstacle};
-
-use errors::*;
+use Result;
 
 use glm;
 use moho::animation::animator;

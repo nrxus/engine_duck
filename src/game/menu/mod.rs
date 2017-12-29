@@ -2,11 +2,10 @@ mod gui;
 
 pub use self::gui::Quit;
 use self::gui::Gui;
-use asset;
+use {asset, Result};
 
 use moho::{self, input};
 use moho::font::Font;
-use moho::errors::*;
 use moho::texture::{Image, Texture};
 use moho::renderer::{align, ColorRGBA, Draw, Renderer, Show};
 

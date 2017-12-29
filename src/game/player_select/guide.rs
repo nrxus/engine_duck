@@ -1,8 +1,8 @@
 use asset::{self, Sprite};
 use data::Animators;
+use Result;
 
 use moho::animation::animator::Animator;
-use moho::errors::*;
 use moho::font::Font;
 use moho::renderer::{align, ColorRGBA, Draw, Renderer, Show};
 use moho::texture::{Image, Texture};

@@ -1,9 +1,8 @@
-use asset;
+use {asset, Result};
 use game::hud::{self, Hud};
 
 use moho::{self, input};
 use moho::engine::step::fixed;
-use moho::errors::*;
 use moho::font::Font;
 use moho::renderer::{Draw, Renderer, Show};
 use moho::texture::Texture;

@@ -1,9 +1,8 @@
-use asset;
+use {asset, Result};
 use game::text::{self, Text};
 
 use moho;
 use moho::font::Font;
-use moho::errors::*;
 use moho::renderer::{align, options, Draw, Renderer, Show};
 use moho::texture::Texture;
 

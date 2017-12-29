@@ -1,7 +1,7 @@
 pub use self::button::Kind as Quit;
+use Result;
 
 use glm;
-use moho::errors::*;
 use moho::{self, input};
 use moho::font::Font;
 use moho::texture::Texture;
@@ -97,8 +97,9 @@ impl<R: Renderer, T: Draw<R> + Texture> Show<R> for Assets<T> {
 }
 
 mod button {
+    use Result;
+
     use glm;
-    use moho::errors::*;
     use moho::font::Font;
     use moho::renderer::{align, options, ColorRGBA};
 

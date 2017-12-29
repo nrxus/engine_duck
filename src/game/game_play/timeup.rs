@@ -1,9 +1,8 @@
-use asset;
+use {asset, Result};
 use super::running;
 
 use glm;
 use moho::{self, input};
-use moho::errors::*;
 use moho::renderer::{align, ColorRGBA, Draw, Renderer, Show};
 use moho::font::Font;
 use moho::texture::{Image, Texture};

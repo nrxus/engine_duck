@@ -1,11 +1,10 @@
-use asset;
+use {asset, Result};
 use game::game_play::{self, GamePlay};
 use game::high_score::{self, HighScore};
 use game::menu::{self, Menu};
 use game::player_select::{self, PlayerSelect};
 
 use moho::{self, input};
-use moho::errors::*;
 use moho::engine::step::fixed;
 use moho::font::Font;
 use moho::renderer::{Draw, Renderer, Show};

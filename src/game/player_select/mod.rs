@@ -5,10 +5,9 @@ pub use self::gui::ButtonKind as PlayerKind;
 use self::gui::Gui;
 use self::guide::Guide;
 use data::Animators;
-use asset;
+use {asset, Result};
 
 use moho::{self, input};
-use moho::errors::*;
 use moho::font::Font;
 use moho::texture::{Image, Texture};
 use moho::renderer::{align, ColorRGBA, Draw, Renderer, Show};

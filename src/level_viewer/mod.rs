@@ -1,4 +1,5 @@
-use errors::*;
+use Result;
+
 use moho::{self, input};
 use moho::engine::{self, Engine, NextScene};
 use moho::engine::step::fixed;
@@ -34,13 +35,13 @@ pub struct Helper {}
 pub struct Assets {}
 
 impl NextScene<World, fixed::State, Helper> for Assets {
-    fn next(self, _: &World, _: &fixed::State, _: &mut Helper) -> moho::errors::Result<Self> {
+    fn next(self, _: &World, _: &fixed::State, _: &mut Helper) -> Result<Self> {
         Ok(Assets {})
     }
 }
 
 impl<R: Renderer> renderer::Show<R> for Assets {
-    fn show(&self, _: &mut R) -> moho::errors::Result<()> {
+    fn show(&self, _: &mut R) -> Result<()> {
         Ok(())
     }
 }

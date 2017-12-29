@@ -1,5 +1,4 @@
-#[macro_use]
-extern crate error_chain;
+extern crate failure;
 extern crate glm;
 extern crate moho;
 extern crate sdl2;
@@ -15,17 +14,7 @@ mod game;
 use moho::engine::{step, Engine};
 use sdl2::image::{INIT_JPG, INIT_PNG};
 
-pub mod errors {
-    error_chain!{
-        links {
-            Moho(::moho::errors::Error, ::moho::errors::ErrorKind);
-        }
-        foreign_links {
-            Io(::std::io::Error);
-            Yaml(::serde_yaml::Error);
-        }
-    }
-}
+type Result<T> = std::result::Result<T, failure::Error>;
 
 fn main() {
     //Setup SDL

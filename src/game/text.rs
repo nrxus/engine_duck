@@ -1,6 +1,7 @@
+use Result;
+
 use glm;
 use moho::font::Font;
-use moho::errors::*;
 use moho::renderer::{self, ColorRGBA, Draw, Renderer, Show};
 use moho::texture::Texture;
 

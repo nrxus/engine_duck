@@ -3,11 +3,10 @@ mod timeup;
 
 use self::running::Running;
 use self::timeup::TimeUp;
-use asset;
+use {asset, Result};
 
 use moho::{self, input};
 use moho::engine::step::fixed;
-use moho::errors::*;
 use moho::font::Font;
 use moho::renderer::{Draw, Renderer, Show};
 use moho::texture::Texture;

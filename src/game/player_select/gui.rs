@@ -1,9 +1,9 @@
 use asset::{self, Sprite};
 use data::Animators;
+use Result;
 
 use moho::animation::animator::{self, Animator};
 use moho::animation::TileSheet;
-use moho::errors::*;
 use moho::{self, input};
 use moho::renderer::{align, Draw, Renderer, Show};
 use moho::texture::{Image, Texture};
