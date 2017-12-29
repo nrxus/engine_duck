@@ -4,7 +4,6 @@ use game::game_play::{self, GamePlay};
 use game::high_score::{self, HighScore};
 use game::menu::{self, Menu};
 use game::player_select::{self, PlayerSelect};
-use game::timeup::{self, TimeUp};
 
 use moho::input;
 use moho::errors::*;
@@ -34,9 +33,6 @@ impl Screen {
                 .catch_quit(|_| Screen::GamePlay(GamePlay::new())),
             Screen::GamePlay(gp) => gp.update(input, elapsed)
                 .map(Screen::GamePlay)
-                .catch_quit(|_| Screen::TimeUp(TimeUp {})),
-            Screen::TimeUp(tu) => tu.update(input)
-                .map(Screen::TimeUp)
                 .catch_quit(|_| Screen::Menu(Menu::default())),
         }
     }
@@ -47,7 +43,6 @@ pub enum Screen {
     HighScore(HighScore),
     PlayerSelect(PlayerSelect),
     GamePlay(GamePlay),
-    TimeUp(TimeUp),
 }
 
 pub enum Assets<T, F> {
@@ -55,7 +50,6 @@ pub enum Assets<T, F> {
     HighScore(high_score::Assets<T>),
     PlayerSelect(player_select::Assets<T>),
     GamePlay(game_play::Assets<T, F>),
-    TimeUp(timeup::Assets<T, F>),
 }
 
 impl<T: Texture, F: Font<Texture = T>> Assets<T, F> {
@@ -72,7 +66,6 @@ impl<T: Texture, F: Font<Texture = T>> Assets<T, F> {
             Screen::GamePlay(ref gp) => {
                 game_play::Assets::load(gp, asset_manager).map(Assets::GamePlay)
             }
-            _ => unreachable!("not an initial screen"),
         }
     }
 }
@@ -101,14 +94,9 @@ impl<T: Texture, F: Font<Texture = T>> Assets<T, F> {
                 _ => player_select::Assets::load(asset_manager),
             }.map(Assets::PlayerSelect),
             Screen::GamePlay(ref world) => match self {
-                Assets::GamePlay(ps) => ps.next(world, step),
+                Assets::GamePlay(ps) => ps.next(world, step, asset_manager),
                 _ => game_play::Assets::load(world, asset_manager),
             }.map(Assets::GamePlay),
-            Screen::TimeUp(_) => match self {
-                Assets::TimeUp(tu) => Ok(tu),
-                Assets::GamePlay(gp) => timeup::Assets::load(asset_manager, gp),
-                _ => unreachable!("can only be loaded from a previous GamePlay"),
-            }.map(Assets::TimeUp),
         }
     }
 }
@@ -120,7 +108,6 @@ impl<R: Renderer, T: Draw<R> + Texture, F> Show<R> for Assets<T, F> {
             Assets::HighScore(ref hs) => renderer.show(hs),
             Assets::PlayerSelect(ref ps) => renderer.show(ps),
             Assets::GamePlay(ref gp) => renderer.show(gp),
-            Assets::TimeUp(ref tu) => renderer.show(tu),
         }
     }
 }

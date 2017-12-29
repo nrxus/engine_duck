@@ -1,5 +1,5 @@
 use asset;
-use game::game_play;
+use super::running;
 
 use glm;
 use moho::{self, input};
@@ -23,13 +23,13 @@ impl TimeUp {
 }
 
 pub struct Assets<T, F> {
-    game: game_play::Assets<T, F>,
+    game: running::Assets<T, F>,
     alert: Image<T>,
     instructions: Image<T>,
 }
 
 impl<T: Texture, F> Assets<T, F> {
-    pub fn load<AM>(asset_manager: &mut AM, game: game_play::Assets<T, F>) -> Result<Self>
+    pub fn load<AM>(asset_manager: &mut AM, game: running::Assets<T, F>) -> Result<Self>
     where
         AM: asset::Manager<Texture = T>,
     {
