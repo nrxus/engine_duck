@@ -64,10 +64,8 @@ impl engine::World for World {
     type Quit = ();
 
     fn update(self, input: &input::State, elapsed: Duration) -> State<Self> {
-        self.screen
-            .update(input, elapsed)
-            .map(|screen| World { screen })
-            .map_quit(|_| ())
+        let screen = self.screen.update(input, elapsed);
+        moho::State::Running(World { screen })
     }
 }
 

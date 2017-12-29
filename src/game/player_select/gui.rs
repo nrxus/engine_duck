@@ -1,10 +1,8 @@
 use asset::{self, Sprite};
 use data::Animators;
-use game;
 
 use moho::animation::animator::{self, Animator};
 use moho::animation::TileSheet;
-use moho::engine::{NextScene, World};
 use moho::errors::*;
 use moho::{self, input};
 use moho::renderer::{align, Draw, Renderer, Show};
@@ -38,12 +36,12 @@ impl Gui {
             husky: animators.husky,
         }
     }
-}
 
-impl World for Gui {
-    type Quit = ButtonKind;
-
-    fn update(mut self, input: &input::State, elapsed: Duration) -> game::State<Self> {
+    pub fn update(
+        mut self,
+        input: &input::State,
+        elapsed: Duration,
+    ) -> moho::State<Self, ButtonKind> {
         let (left, right) = {
             let left = input.did_press_key(Keycode::Left);
             let right = input.did_press_key(Keycode::Right);
@@ -142,6 +140,24 @@ impl<T: Texture> Assets<T> {
         };
         Ok(Self { duck, husky })
     }
+
+    pub fn next(mut self, gui: &Gui) -> Self {
+        match gui.selected {
+            None => {
+                self.duck = self.duck.deselected();
+                self.husky = self.husky.deselected();
+            }
+            Some(Selected::Duck(a)) => {
+                self.husky = self.husky.deselected();
+                self.duck = self.duck.selected(a.frame());
+            }
+            Some(Selected::Husky(a)) => {
+                self.duck = self.duck.deselected();
+                self.husky = self.husky.selected(a.frame());
+            }
+        }
+        self
+    }
 }
 
 impl<T: Draw<R>, R: Renderer> Show<R> for Button<T> {
@@ -160,25 +176,5 @@ impl<T: Draw<R>, R: Renderer> Show<R> for Assets<T> {
     fn show(&self, renderer: &mut R) -> Result<()> {
         renderer.show(&self.duck)?;
         renderer.show(&self.husky)
-    }
-}
-
-impl<T: Texture> NextScene<Gui, (), ()> for Assets<T> {
-    fn next(mut self, gui: &Gui, _: &(), _: &mut ()) -> Result<Self> {
-        match gui.selected {
-            None => {
-                self.duck = self.duck.deselected();
-                self.husky = self.husky.deselected();
-            }
-            Some(Selected::Duck(a)) => {
-                self.husky = self.husky.deselected();
-                self.duck = self.duck.selected(a.frame());
-            }
-            Some(Selected::Husky(a)) => {
-                self.duck = self.duck.deselected();
-                self.husky = self.husky.selected(a.frame());
-            }
-        }
-        Ok(self)
     }
 }

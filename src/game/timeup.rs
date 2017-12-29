@@ -1,9 +1,8 @@
 use asset;
-use game::{self, game_play};
+use game::game_play;
 
 use glm;
 use moho::{self, input};
-use moho::engine::World;
 use moho::errors::*;
 use moho::renderer::{align, ColorRGBA, Draw, Renderer, Show};
 use moho::font::Font;
@@ -11,14 +10,10 @@ use moho::texture::{Image, Texture};
 use sdl2::keyboard::Keycode;
 use sdl2::rect::Rect;
 
-use std::time::Duration;
-
 pub struct TimeUp {}
 
-impl World for TimeUp {
-    type Quit = ();
-
-    fn update(self, input: &input::State, _: Duration) -> game::State<Self> {
+impl TimeUp {
+    pub fn update(self, input: &input::State) -> moho::State<Self, ()> {
         if input.did_press_key(Keycode::Return) {
             moho::State::Quit(())
         } else {

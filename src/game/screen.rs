@@ -1,4 +1,4 @@
-use {asset, game};
+use asset;
 use data::Animators;
 use game::game_play::{self, GamePlay};
 use game::high_score::{self, HighScore};
@@ -6,9 +6,8 @@ use game::menu::{self, Menu};
 use game::player_select::{self, PlayerSelect};
 use game::timeup::{self, TimeUp};
 
-use moho::{self, input, Never};
+use moho::input;
 use moho::errors::*;
-use moho::engine::{NextScene, World};
 use moho::engine::step::fixed;
 use moho::font::Font;
 use moho::renderer::{Draw, Renderer, Show};
@@ -28,6 +27,29 @@ impl Screen {
             current: Kind::Menu(Menu::default()),
         }
     }
+
+    pub fn update(self, input: &input::State, elapsed: Duration) -> Self {
+        let animators = self.animators;
+        let current = match self.current {
+            Kind::Menu(m) => m.update(input).map(Kind::Menu).catch_quit(|b| match b {
+                menu::Quit::NewGame => Kind::PlayerSelect(PlayerSelect::new(&animators)),
+                menu::Quit::HighScore => Kind::HighScore(HighScore {}),
+            }),
+            Kind::HighScore(hs) => hs.update(input)
+                .map(Kind::HighScore)
+                .catch_quit(|_| Kind::Menu(Menu::default())),
+            Kind::PlayerSelect(ps) => ps.update(input, elapsed)
+                .map(Kind::PlayerSelect)
+                .catch_quit(|_| Kind::GamePlay(GamePlay::new())),
+            Kind::GamePlay(gp) => gp.update(input, elapsed)
+                .map(Kind::GamePlay)
+                .catch_quit(|_| Kind::TimeUp(TimeUp {})),
+            Kind::TimeUp(tu) => tu.update(input)
+                .map(Kind::TimeUp)
+                .catch_quit(|_| Kind::Menu(Menu::default())),
+        };
+        Screen { current, animators }
+    }
 }
 
 pub enum Kind {
@@ -44,35 +66,6 @@ pub enum Assets<T, F> {
     PlayerSelect(player_select::Assets<T>),
     GamePlay(game_play::Assets<T, F>),
     TimeUp(timeup::Assets<T, F>),
-}
-
-impl World for Screen {
-    type Quit = Never;
-
-    fn update(self, input: &input::State, elapsed: Duration) -> game::State<Self> {
-        let animators = self.animators;
-        let current = match self.current {
-            Kind::Menu(m) => m.update(input, elapsed)
-                .map(Kind::Menu)
-                .catch_quit(|b| match b {
-                    menu::Quit::NewGame => Kind::PlayerSelect(PlayerSelect::new(&animators)),
-                    menu::Quit::HighScore => Kind::HighScore(HighScore {}),
-                }),
-            Kind::HighScore(hs) => hs.update(input, elapsed)
-                .map(Kind::HighScore)
-                .catch_quit(|_| Kind::Menu(Menu::default())),
-            Kind::PlayerSelect(ps) => ps.update(input, elapsed)
-                .map(Kind::PlayerSelect)
-                .catch_quit(|_| Kind::GamePlay(GamePlay::new())),
-            Kind::GamePlay(gp) => gp.update(input, elapsed)
-                .map(Kind::GamePlay)
-                .catch_quit(|_| Kind::TimeUp(TimeUp {})),
-            Kind::TimeUp(tu) => tu.update(input, elapsed)
-                .map(Kind::TimeUp)
-                .catch_quit(|_| Kind::Menu(Menu::default())),
-        };
-        moho::State::Running(Screen { current, animators })
-    }
 }
 
 impl<T: Texture, F: Font<Texture = T>> Assets<T, F> {
@@ -94,11 +87,19 @@ impl<T: Texture, F: Font<Texture = T>> Assets<T, F> {
     }
 }
 
-impl<AM: asset::Manager> NextScene<Screen, fixed::State, AM> for Assets<AM::Texture, AM::Font> {
-    fn next(self, screen: &Screen, _: &fixed::State, asset_manager: &mut AM) -> Result<Self> {
+impl<T: Texture, F: Font<Texture = T>> Assets<T, F> {
+    pub fn next<AM>(
+        self,
+        screen: &Screen,
+        step: &fixed::State,
+        asset_manager: &mut AM,
+    ) -> Result<Self>
+    where
+        AM: asset::Manager<Texture = T, Font = F>,
+    {
         match screen.current {
             Kind::Menu(ref world) => match self {
-                Assets::Menu(m) => m.next(world, &(), &mut ()).map(Assets::Menu),
+                Assets::Menu(m) => Ok(m.next(world)).map(Assets::Menu),
                 _ => menu::Assets::load(world, asset_manager).map(Assets::Menu),
             },
             Kind::HighScore(_) => match self {
@@ -106,11 +107,11 @@ impl<AM: asset::Manager> NextScene<Screen, fixed::State, AM> for Assets<AM::Text
                 _ => high_score::Assets::load(asset_manager).map(Assets::HighScore),
             },
             Kind::PlayerSelect(ref world) => match self {
-                Assets::PlayerSelect(ps) => ps.next(world, &(), &mut ()).map(Assets::PlayerSelect),
+                Assets::PlayerSelect(ps) => Ok(ps.next(world)).map(Assets::PlayerSelect),
                 _ => player_select::Assets::load(asset_manager).map(Assets::PlayerSelect),
             },
             Kind::GamePlay(ref world) => match self {
-                Assets::GamePlay(ps) => ps.next(world, &(), &mut ()).map(Assets::GamePlay),
+                Assets::GamePlay(ps) => ps.next(world, step).map(Assets::GamePlay),
                 _ => game_play::Assets::load(world, asset_manager).map(Assets::GamePlay),
             },
             Kind::TimeUp(_) => match self {

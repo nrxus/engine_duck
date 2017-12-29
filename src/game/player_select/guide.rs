@@ -1,10 +1,7 @@
 use asset::{self, Sprite};
 use data::Animators;
-use game;
 
-use moho::{self, input};
 use moho::animation::animator::Animator;
-use moho::engine::{NextScene, World};
 use moho::errors::*;
 use moho::font::Font;
 use moho::renderer::{align, ColorRGBA, Draw, Renderer, Show};
@@ -26,16 +23,12 @@ impl Guide {
             cat: animators.cat_idle.start(),
         }
     }
-}
 
-impl World for Guide {
-    type Quit = moho::Never;
-
-    fn update(mut self, _: &input::State, elapsed: Duration) -> game::State<Self> {
+    pub fn update(mut self, elapsed: Duration) -> Self {
         self.coin.animate(elapsed);
         self.gem.animate(elapsed);
         self.cat.animate(elapsed);
-        moho::State::Running(self)
+        self
     }
 }
 
@@ -87,12 +80,12 @@ impl<T: Texture> Assets<T> {
     }
 }
 
-impl<T> NextScene<Guide, (), ()> for Assets<T> {
-    fn next(mut self, world: &Guide, _: &(), _: &mut ()) -> Result<Self> {
+impl<T> Assets<T> {
+    pub fn next(mut self, world: &Guide) -> Self {
         self.gem.tile = world.gem.frame();
         self.coin.tile = world.coin.frame();
         self.cat.tile = world.cat.frame();
-        Ok(self)
+        self
     }
 }
 

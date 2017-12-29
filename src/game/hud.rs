@@ -3,7 +3,6 @@ use game::text::{self, Text};
 
 use moho;
 use moho::font::Font;
-use moho::engine::NextScene;
 use moho::errors::*;
 use moho::renderer::{align, options, Draw, Renderer, Show};
 use moho::texture::Texture;
@@ -13,7 +12,7 @@ use std::rc::Rc;
 
 pub struct Hud {
     timer: Duration,
-    score: u32,
+    pub score: u32,
 }
 
 impl Default for Hud {
@@ -59,8 +58,8 @@ pub struct Assets<T, F> {
     score: Text<T, F, u32>,
 }
 
-impl<T, F: Font<Texture = T>> NextScene<Hud, (), ()> for Assets<T, F> {
-    fn next(mut self, hud: &Hud, _: &(), _: &mut ()) -> Result<Self> {
+impl<T, F: Font<Texture = T>> Assets<T, F> {
+    pub fn next(mut self, hud: &Hud) -> Result<Self> {
         self.timer.update(hud.timer)?;
         Ok(self)
     }

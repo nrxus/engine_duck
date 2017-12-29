@@ -1,17 +1,14 @@
 pub use self::button::Kind as Quit;
-use game;
 
 use glm;
 use moho::errors::*;
 use moho::{self, input};
-use moho::engine::{NextScene, World};
 use moho::font::Font;
 use moho::texture::Texture;
 use moho::renderer::{align, options, Draw, Renderer, Show};
 use sdl2::keyboard::Keycode;
 
 use std::rc::Rc;
-use std::time::Duration;
 
 pub struct Gui {
     selected: button::Kind,
@@ -25,10 +22,8 @@ impl Default for Gui {
     }
 }
 
-impl World for Gui {
-    type Quit = Quit;
-
-    fn update(mut self, input: &input::State, _: Duration) -> game::State<Self> {
+impl Gui {
+    pub fn update(mut self, input: &input::State) -> moho::State<Self, Quit> {
         if input.did_press_key(Keycode::Down) ^ input.did_press_key(Keycode::Up) {
             self.selected = match self.selected {
                 button::Kind::NewGame => button::Kind::HighScore,
@@ -40,13 +35,6 @@ impl World for Gui {
         } else {
             moho::State::Running(self)
         }
-    }
-}
-
-impl<T: Texture> NextScene<Gui, (), ()> for Assets<T> {
-    fn next(mut self, gui: &Gui, _: &(), _: &mut ()) -> Result<Self> {
-        self.selected = gui.selected;
-        Ok(self)
     }
 }
 
@@ -78,6 +66,11 @@ impl<T> Assets<T> {
             picker,
             selected: gui.selected,
         })
+    }
+
+    pub fn next(mut self, gui: &Gui) -> Self {
+        self.selected = gui.selected;
+        self
     }
 }
 

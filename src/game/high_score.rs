@@ -1,22 +1,16 @@
 use asset;
-use game;
 
 use moho::{self, input};
-use moho::engine::World;
 use moho::errors::*;
 use moho::font::Font;
 use moho::texture::{Image, Texture};
 use moho::renderer::{align, ColorRGBA, Draw, Renderer, Show};
 use sdl2::keyboard::Keycode;
 
-use std::time::Duration;
-
 pub struct HighScore {}
 
-impl World for HighScore {
-    type Quit = ();
-
-    fn update(self, input: &input::State, _: Duration) -> game::State<Self> {
+impl HighScore {
+    pub fn update(self, input: &input::State) -> moho::State<Self, ()> {
         if input.did_press_key(Keycode::Return) {
             moho::State::Quit(())
         } else {

@@ -5,11 +5,9 @@ pub use self::gui::ButtonKind as PlayerKind;
 use self::gui::Gui;
 use self::guide::Guide;
 use data::Animators;
-use game;
 use asset;
 
-use moho::input;
-use moho::engine::{NextScene, World};
+use moho::{self, input};
 use moho::errors::*;
 use moho::font::Font;
 use moho::texture::{Image, Texture};
@@ -29,16 +27,12 @@ impl PlayerSelect {
             gui: Gui::new(animators),
         }
     }
-}
 
-impl World for PlayerSelect {
-    type Quit = PlayerKind;
-
-    fn update(self, input: &input::State, elapsed: Duration) -> game::State<Self> {
+    pub fn update(self, input: &input::State, elapsed: Duration) -> moho::State<Self, PlayerKind> {
         let guide = self.guide;
 
         self.gui.update(input, elapsed).map(|gui| {
-            let guide = guide.update(input, elapsed).get();
+            let guide = guide.update(elapsed);
             PlayerSelect { gui, guide }
         })
     }
@@ -49,14 +43,6 @@ pub struct Assets<T> {
     instructions: Image<T>,
     guide: guide::Assets<T>,
     gui: gui::Assets<T>,
-}
-
-impl<T: Texture> NextScene<PlayerSelect, (), ()> for Assets<T> {
-    fn next(mut self, world: &PlayerSelect, _: &(), _: &mut ()) -> Result<Self> {
-        self.guide = self.guide.next(&world.guide, &(), &mut ())?;
-        self.gui = self.gui.next(&world.gui, &(), &mut ())?;
-        Ok(self)
-    }
 }
 
 impl<T: Texture> Assets<T> {
@@ -88,6 +74,12 @@ impl<T: Texture> Assets<T> {
             instructions,
             gui,
         })
+    }
+
+    pub fn next(mut self, world: &PlayerSelect) -> Self {
+        self.guide = self.guide.next(&world.guide);
+        self.gui = self.gui.next(&world.gui);
+        self
     }
 }
 

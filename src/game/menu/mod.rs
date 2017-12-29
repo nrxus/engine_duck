@@ -3,35 +3,23 @@ mod gui;
 pub use self::gui::Quit;
 use self::gui::Gui;
 use asset;
-use game;
 
-use moho::input;
+use moho::{self, input};
 use moho::font::Font;
 use moho::errors::*;
-use moho::engine::{NextScene, World};
 use moho::texture::{Image, Texture};
 use moho::renderer::{align, ColorRGBA, Draw, Renderer, Show};
 
 use std::rc::Rc;
-use std::time::Duration;
 
 #[derive(Default)]
 pub struct Menu {
     gui: Gui,
 }
 
-impl World for Menu {
-    type Quit = Quit;
-
-    fn update(self, input: &input::State, elapsed: Duration) -> game::State<Self> {
-        self.gui.update(input, elapsed).map(|gui| Menu { gui })
-    }
-}
-
-impl<T: Texture> NextScene<Menu, (), ()> for Assets<T> {
-    fn next(mut self, menu: &Menu, _: &(), _: &mut ()) -> Result<Self> {
-        self.gui = self.gui.next(&menu.gui, &(), &mut ())?;
-        Ok(self)
+impl Menu {
+    pub fn update(self, input: &input::State) -> moho::State<Self, Quit> {
+        self.gui.update(input).map(|gui| Menu { gui })
     }
 }
 
@@ -82,6 +70,13 @@ impl<T: Texture> Assets<T> {
             instructions,
             gui,
         })
+    }
+}
+
+impl<T> Assets<T> {
+    pub fn next(mut self, menu: &Menu) -> Self {
+        self.gui = self.gui.next(&menu.gui);
+        self
     }
 }
 
