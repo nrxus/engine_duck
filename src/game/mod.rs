@@ -7,6 +7,7 @@ mod player_select;
 mod score_repository;
 mod screen;
 mod text;
+mod timeup;
 
 use self::screen::Screen;
 use self::helper::Helper;

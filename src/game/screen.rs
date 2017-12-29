@@ -1,10 +1,10 @@
-use asset;
+use {asset, game};
 use data::Animators;
-use game;
 use game::game_play::{self, GamePlay};
-use game::menu::{self, Menu};
 use game::high_score::{self, HighScore};
+use game::menu::{self, Menu};
 use game::player_select::{self, PlayerSelect};
+use game::timeup::{self, TimeUp};
 
 use moho::{self, input, Never};
 use moho::errors::*;
@@ -35,6 +35,7 @@ pub enum Kind {
     HighScore(HighScore),
     PlayerSelect(PlayerSelect),
     GamePlay(GamePlay),
+    TimeUp(TimeUp),
 }
 
 pub enum Assets<T, F> {
@@ -42,6 +43,7 @@ pub enum Assets<T, F> {
     HighScore(high_score::Assets<T>),
     PlayerSelect(player_select::Assets<T>),
     GamePlay(game_play::Assets<T, F>),
+    TimeUp(timeup::Assets<T, F>),
 }
 
 impl World for Screen {
@@ -64,6 +66,9 @@ impl World for Screen {
                 .catch_quit(|_| Kind::GamePlay(GamePlay::new())),
             Kind::GamePlay(gp) => gp.update(input, elapsed)
                 .map(Kind::GamePlay)
+                .catch_quit(|_| Kind::TimeUp(TimeUp {})),
+            Kind::TimeUp(tu) => tu.update(input, elapsed)
+                .map(Kind::TimeUp)
                 .catch_quit(|_| Kind::Menu(Menu::default())),
         };
         moho::State::Running(Screen { current, animators })
@@ -84,28 +89,34 @@ impl<T: Texture, F: Font<Texture = T>> Assets<T, F> {
             Kind::GamePlay(ref gp) => {
                 game_play::Assets::load(gp, asset_manager).map(Assets::GamePlay)
             }
+            _ => unreachable!("not an initial screen"),
         }
     }
 }
 
 impl<AM: asset::Manager> NextScene<Screen, fixed::State, AM> for Assets<AM::Texture, AM::Font> {
-    fn next(self, screen: &Screen, _: &fixed::State, helper: &mut AM) -> Result<Self> {
+    fn next(self, screen: &Screen, _: &fixed::State, asset_manager: &mut AM) -> Result<Self> {
         match screen.current {
             Kind::Menu(ref world) => match self {
                 Assets::Menu(m) => m.next(world, &(), &mut ()).map(Assets::Menu),
-                _ => Assets::load(screen, helper),
+                _ => menu::Assets::load(world, asset_manager).map(Assets::Menu),
             },
             Kind::HighScore(_) => match self {
                 hs @ Assets::HighScore(_) => Ok(hs),
-                _ => Assets::load(screen, helper),
+                _ => high_score::Assets::load(asset_manager).map(Assets::HighScore),
             },
             Kind::PlayerSelect(ref world) => match self {
                 Assets::PlayerSelect(ps) => ps.next(world, &(), &mut ()).map(Assets::PlayerSelect),
-                _ => Assets::load(screen, helper),
+                _ => player_select::Assets::load(asset_manager).map(Assets::PlayerSelect),
             },
             Kind::GamePlay(ref world) => match self {
                 Assets::GamePlay(ps) => ps.next(world, &(), &mut ()).map(Assets::GamePlay),
-                _ => Assets::load(screen, helper),
+                _ => game_play::Assets::load(world, asset_manager).map(Assets::GamePlay),
+            },
+            Kind::TimeUp(_) => match self {
+                tu @ Assets::TimeUp(_) => Ok(tu),
+                Assets::GamePlay(gp) => timeup::Assets::load(asset_manager, gp).map(Assets::TimeUp),
+                _ => unreachable!("can only be loaded from a previous GamePlay"),
             },
         }
     }
@@ -118,6 +129,7 @@ impl<R: Renderer, T: Draw<R> + Texture, F> Show<R> for Assets<T, F> {
             Assets::HighScore(ref hs) => renderer.show(hs),
             Assets::PlayerSelect(ref ps) => renderer.show(ps),
             Assets::GamePlay(ref gp) => renderer.show(gp),
+            Assets::TimeUp(ref tu) => renderer.show(tu),
         }
     }
 }
