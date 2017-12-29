@@ -65,11 +65,19 @@ impl engine::World for World {
     type Quit = ();
 
     fn update(self, input: &input::State, elapsed: Duration) -> State<Self> {
-        let screen = self.screen.update(input, elapsed, &self.animators);
-        moho::State::Running(World {
-            screen,
-            animators: self.animators,
-        })
+        let animators = self.animators;
+        let screen = self.screen.update(input, elapsed).catch_quit(|q| match q {
+            screen::Quit::Menu(m) => match m {
+                menu::Quit::NewGame => {
+                    Screen::PlayerSelect(player_select::PlayerSelect::new(&animators))
+                }
+                menu::Quit::HighScore => Screen::HighScore(high_score::HighScore {}),
+            },
+            screen::Quit::HighScore => Screen::Menu(menu::Menu::default()),
+            screen::Quit::PlayerSelect => Screen::GamePlay(game_play::GamePlay::new()),
+            screen::Quit::GamePlay => Screen::Menu(menu::Menu::default()),
+        });
+        moho::State::Running(World { screen, animators })
     }
 }
 

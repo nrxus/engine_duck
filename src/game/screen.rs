@@ -1,11 +1,10 @@
 use asset;
-use data::Animators;
 use game::game_play::{self, GamePlay};
 use game::high_score::{self, HighScore};
 use game::menu::{self, Menu};
 use game::player_select::{self, PlayerSelect};
 
-use moho::input;
+use moho::{self, input};
 use moho::errors::*;
 use moho::engine::step::fixed;
 use moho::font::Font;
@@ -14,26 +13,30 @@ use moho::texture::Texture;
 
 use std::time::Duration;
 
+pub enum Quit {
+    Menu(menu::Quit),
+    HighScore,
+    PlayerSelect,
+    GamePlay,
+}
+
 impl Screen {
     pub fn new() -> Self {
         Screen::Menu(Menu::default())
     }
 
-    pub fn update(self, input: &input::State, elapsed: Duration, animators: &Animators) -> Self {
+    pub fn update(self, input: &input::State, elapsed: Duration) -> moho::State<Self, Quit> {
         match self {
-            Screen::Menu(m) => m.update(input).map(Screen::Menu).catch_quit(|b| match b {
-                menu::Quit::NewGame => Screen::PlayerSelect(PlayerSelect::new(animators)),
-                menu::Quit::HighScore => Screen::HighScore(HighScore {}),
-            }),
+            Screen::Menu(m) => m.update(input).map(Screen::Menu).map_quit(Quit::Menu),
             Screen::HighScore(hs) => hs.update(input)
                 .map(Screen::HighScore)
-                .catch_quit(|_| Screen::Menu(Menu::default())),
+                .map_quit(|_| Quit::HighScore),
             Screen::PlayerSelect(ps) => ps.update(input, elapsed)
                 .map(Screen::PlayerSelect)
-                .catch_quit(|_| Screen::GamePlay(GamePlay::new())),
+                .map_quit(|_| Quit::PlayerSelect),
             Screen::GamePlay(gp) => gp.update(input, elapsed)
                 .map(Screen::GamePlay)
-                .catch_quit(|_| Screen::Menu(Menu::default())),
+                .map_quit(|_| Quit::GamePlay),
         }
     }
 }
