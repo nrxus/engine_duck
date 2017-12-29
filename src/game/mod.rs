@@ -45,7 +45,8 @@ where
     let texture_manager = texture::Manager::new(texture_loader);
     let data = data::Game::load("media/game_data.yaml")?;
     let world = World {
-        screen: Screen::new(data.animators()),
+        animators: data.animators(),
+        screen: Screen::new(),
     };
     let mut helper = Helper {
         font_manager,
@@ -58,14 +59,18 @@ where
 
 pub struct World {
     screen: Screen,
+    animators: data::Animators,
 }
 
 impl engine::World for World {
     type Quit = ();
 
     fn update(self, input: &input::State, elapsed: Duration) -> State<Self> {
-        let screen = self.screen.update(input, elapsed);
-        moho::State::Running(World { screen })
+        let screen = self.screen.update(input, elapsed, &self.animators);
+        moho::State::Running(World {
+            screen,
+            animators: self.animators,
+        })
     }
 }
 
