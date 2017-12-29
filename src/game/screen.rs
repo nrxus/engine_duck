@@ -99,26 +99,26 @@ impl<T: Texture, F: Font<Texture = T>> Assets<T, F> {
     {
         match screen.current {
             Kind::Menu(ref world) => match self {
-                Assets::Menu(m) => Ok(m.next(world)).map(Assets::Menu),
-                _ => menu::Assets::load(world, asset_manager).map(Assets::Menu),
-            },
+                Assets::Menu(m) => Ok(m.next(world)),
+                _ => menu::Assets::load(world, asset_manager),
+            }.map(Assets::Menu),
             Kind::HighScore(_) => match self {
-                hs @ Assets::HighScore(_) => Ok(hs),
-                _ => high_score::Assets::load(asset_manager).map(Assets::HighScore),
-            },
+                Assets::HighScore(hs) => Ok(hs),
+                _ => high_score::Assets::load(asset_manager),
+            }.map(Assets::HighScore),
             Kind::PlayerSelect(ref world) => match self {
-                Assets::PlayerSelect(ps) => Ok(ps.next(world)).map(Assets::PlayerSelect),
-                _ => player_select::Assets::load(asset_manager).map(Assets::PlayerSelect),
-            },
+                Assets::PlayerSelect(ps) => Ok(ps.next(world)),
+                _ => player_select::Assets::load(asset_manager),
+            }.map(Assets::PlayerSelect),
             Kind::GamePlay(ref world) => match self {
-                Assets::GamePlay(ps) => ps.next(world, step).map(Assets::GamePlay),
-                _ => game_play::Assets::load(world, asset_manager).map(Assets::GamePlay),
-            },
+                Assets::GamePlay(ps) => ps.next(world, step),
+                _ => game_play::Assets::load(world, asset_manager),
+            }.map(Assets::GamePlay),
             Kind::TimeUp(_) => match self {
-                tu @ Assets::TimeUp(_) => Ok(tu),
-                Assets::GamePlay(gp) => timeup::Assets::load(asset_manager, gp).map(Assets::TimeUp),
+                Assets::TimeUp(tu) => Ok(tu),
+                Assets::GamePlay(gp) => timeup::Assets::load(asset_manager, gp),
                 _ => unreachable!("can only be loaded from a previous GamePlay"),
-            },
+            }.map(Assets::TimeUp),
         }
     }
 }
