@@ -4,6 +4,7 @@ mod timeup;
 use self::running::Running;
 use self::timeup::TimeUp;
 use {asset, Result};
+use game::player;
 
 use moho::{self, input};
 use moho::engine::step::fixed;
@@ -19,8 +20,8 @@ pub enum GamePlay {
 }
 
 impl GamePlay {
-    pub fn new() -> Self {
-        GamePlay::Running(Running::new())
+    pub fn new(kind: player::Kind) -> Self {
+        GamePlay::Running(Running::new(kind))
     }
 
     pub fn update(self, input: &input::State, elapsed: Duration) -> moho::State<Self, ()> {

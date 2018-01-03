@@ -15,7 +15,7 @@ use std::time::Duration;
 pub enum Quit {
     Menu(menu::Quit),
     HighScore,
-    PlayerSelect,
+    PlayerSelect(player_select::PlayerKind),
     GamePlay,
 }
 
@@ -32,7 +32,7 @@ impl Screen {
                 .map_quit(|_| Quit::HighScore),
             Screen::PlayerSelect(ps) => ps.update(input, elapsed)
                 .map(Screen::PlayerSelect)
-                .map_quit(|_| Quit::PlayerSelect),
+                .map_quit(|k| Quit::PlayerSelect(k)),
             Screen::GamePlay(gp) => gp.update(input, elapsed)
                 .map(Screen::GamePlay)
                 .map_quit(|_| Quit::GamePlay),
