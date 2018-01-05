@@ -1,4 +1,5 @@
 use {asset, Result};
+use data::Animators;
 use game::hud::{self, Hud};
 use game::player::{self, Player};
 
@@ -16,15 +17,16 @@ pub struct Running {
 }
 
 impl Running {
-    pub fn new(kind: player::Kind) -> Self {
+    pub fn new(kind: player::Kind, animators: &Animators) -> Self {
         Running {
             hud: Hud::default(),
-            player: Player::new(kind),
+            player: Player::new(kind, animators),
         }
     }
 
-    pub fn update(self, _: &input::State, elapsed: Duration) -> moho::State<Self, ()> {
-        let player = self.player;
+    pub fn update(self, input: &input::State, elapsed: Duration) -> moho::State<Self, ()> {
+        let mut player = self.player;
+        player.update(input, elapsed);
 
         self.hud
             .update(0, elapsed)
@@ -40,6 +42,7 @@ pub struct Assets<T, F> {
 impl<T, F: Font<Texture = T>> Assets<T, F> {
     pub fn next(mut self, world: &Running, _: &fixed::State) -> Result<Self> {
         self.hud = self.hud.next(&world.hud)?;
+        self.player = self.player.next(&world.player);
         Ok(self)
     }
 }
