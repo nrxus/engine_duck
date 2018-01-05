@@ -7,7 +7,7 @@ use glm;
 use moho::animation::TileSheet;
 use moho::animation::animator::{self, Animator};
 use moho::input;
-use moho::renderer::{align, Draw, Renderer, Show};
+use moho::renderer::{align, options, Draw, Renderer, Show};
 use moho::texture::{Image, Texture};
 use sdl2::keyboard::Keycode;
 
@@ -61,7 +61,7 @@ impl Player {
         self.action = match self.action {
             Action::Idle { animator } | Action::Jump { animator, .. } => if up {
                 Action::Jump {
-                    velocity: glm::dvec2(10., f64::from(x_vel)),
+                    velocity: glm::dvec2(f64::from(x_vel), 10.),
                     animator,
                 }
             } else if x_vel != 0 {
@@ -74,7 +74,7 @@ impl Player {
             },
             Action::Walk { mut animator, .. } => if up {
                 Action::Jump {
-                    velocity: glm::dvec2(10., f64::from(x_vel)),
+                    velocity: glm::dvec2(f64::from(x_vel), 10.),
                     animator: animator.stop(),
                 }
             } else if x_vel != 0 {
@@ -93,8 +93,8 @@ impl Player {
 }
 
 pub enum Assets<T> {
-    Idle(Image<T>, TileSheet<T>),
-    Animated(Sprite<T>, Rc<T>),
+    Idle(Image<T>, TileSheet<T>, Option<options::Flip>),
+    Animated(Sprite<T>, Rc<T>, Option<options::Flip>),
 }
 
 impl<T: Texture> Assets<T> {
@@ -108,34 +108,61 @@ impl<T: Texture> Assets<T> {
         };
         let image = asset_manager.image(texture, align::left(0).top(200))?;
         let sheet = asset_manager.sheet(animation)?;
-        Ok(Assets::Idle(image, sheet))
+        Ok(Assets::Idle(image, sheet, None))
     }
 }
 
 impl<T> Assets<T> {
     pub fn next(self, player: &Player) -> Self {
         match player.action {
-            Action::Idle { .. } | Action::Jump { .. } => {
-                let (image, sheet) = match self {
-                    Assets::Animated(s, texture) => (
+            Action::Idle { .. } => match self {
+                Assets::Animated(s, texture, flip) => Assets::Idle(
+                    Image {
+                        texture,
+                        dst: s.dst,
+                    },
+                    s.sheet,
+                    flip,
+                ),
+                b => b,
+            },
+            Action::Jump { ref velocity, .. } => {
+                let (image, sheet, f) = match self {
+                    Assets::Animated(s, texture, f) => (
                         Image {
                             texture,
                             dst: s.dst,
                         },
                         s.sheet,
+                        f,
                     ),
-                    Assets::Idle(i, t) => (i, t),
+                    Assets::Idle(i, t, f) => (i, t, f),
                 };
-                Assets::Idle(image, sheet)
+                let flip = if velocity.x == 0. {
+                    f
+                } else if velocity.x < 0. {
+                    Some(options::Flip::Horizontal)
+                } else {
+                    None
+                };
+                Assets::Idle(image, sheet, flip)
             }
-            Action::Walk { ref animator, .. } => {
+            Action::Walk {
+                ref animator,
+                ref velocity,
+            } => {
                 let tile = animator.frame();
+                let flip = if *velocity < 0. {
+                    Some(options::Flip::Horizontal)
+                } else {
+                    None
+                };
                 let (sprite, texture) = match self {
-                    Assets::Animated(mut sprite, texture) => {
+                    Assets::Animated(mut sprite, texture, _) => {
                         sprite.tile = tile;
                         (sprite, texture)
                     }
-                    Assets::Idle(i, sheet) => (
+                    Assets::Idle(i, sheet, _) => (
                         Sprite {
                             sheet,
                             tile,
@@ -144,7 +171,7 @@ impl<T> Assets<T> {
                         i.texture,
                     ),
                 };
-                Assets::Animated(sprite, texture)
+                Assets::Animated(sprite, texture, flip)
             }
         }
     }
@@ -153,8 +180,14 @@ impl<T> Assets<T> {
 impl<R: Renderer, T: Draw<R>> Show<R> for Assets<T> {
     fn show(&self, renderer: &mut R) -> Result<()> {
         match *self {
-            Assets::Idle(ref asset, _) => renderer.show(asset),
-            Assets::Animated(ref asset, _) => renderer.show(asset),
+            Assets::Idle(ref asset, _, flip) => match flip {
+                Some(f) => renderer.draw(asset, options::flip(f)),
+                None => renderer.show(asset),
+            },
+            Assets::Animated(ref asset, _, flip) => match flip {
+                Some(f) => renderer.draw(asset, options::flip(f)),
+                None => renderer.show(asset),
+            },
         }
     }
 }
