@@ -70,11 +70,10 @@ impl engine::World for World {
                 }
                 menu::Quit::HighScore => Screen::HighScore(high_score::HighScore {}),
             },
-            screen::Quit::HighScore => Screen::Menu(menu::Menu::default()),
+            screen::Quit::HighScore | screen::Quit::GamePlay => Screen::Menu(menu::Menu::default()),
             screen::Quit::PlayerSelect(k) => {
                 Screen::GamePlay(game_play::GamePlay::new(k, &animators))
             }
-            screen::Quit::GamePlay => Screen::Menu(menu::Menu::default()),
         });
         moho::State::Running(World { screen, animators })
     }

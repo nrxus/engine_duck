@@ -58,38 +58,34 @@ impl Player {
             }
         };
         let up = input.is_key_down(Keycode::Space);
-        match self.action {
-            Action::Idle { animator } => if up {
-                self.action = Action::Jump {
+        self.action = match self.action {
+            Action::Idle { animator } | Action::Jump { animator, .. } => if up {
+                Action::Jump {
                     velocity: glm::dvec2(10., f64::from(x_vel)),
                     animator,
                 }
             } else if x_vel != 0 {
-                self.action = Action::Walk {
+                Action::Walk {
                     velocity: f64::from(x_vel),
                     animator: animator.start(),
                 }
+            } else {
+                Action::Idle { animator }
             },
-            Action::Jump { animator, .. } => {
-                self.action = if up {
-                    Action::Jump {
-                        velocity: glm::dvec2(10., f64::from(x_vel)),
-                        animator,
-                    }
-                } else if x_vel != 0 {
-                    Action::Walk {
-                        velocity: f64::from(x_vel),
-                        animator: animator.start(),
-                    }
-                } else {
-                    Action::Idle { animator }
+            Action::Walk { mut animator, .. } => if up {
+                Action::Jump {
+                    velocity: glm::dvec2(10., f64::from(x_vel)),
+                    animator: animator.stop(),
                 }
-            }
-            Action::Walk { mut animator, .. } => if x_vel != 0 {
+            } else if x_vel != 0 {
                 animator.animate(elapsed);
-                self.action = Action::Walk {
+                Action::Walk {
                     velocity: f64::from(x_vel),
-                    animator: animator,
+                    animator,
+                }
+            } else {
+                Action::Idle {
+                    animator: animator.stop(),
                 }
             },
         }
@@ -171,9 +167,8 @@ impl<T> Assets<T> {
 impl<R: Renderer, T: Draw<R>> Show<R> for Assets<T> {
     fn show(&self, renderer: &mut R) -> Result<()> {
         match *self {
-            Assets::Idle(ref asset, _) => renderer.show(asset),
+            Assets::Idle(ref asset, _) | Assets::Jump(ref asset, _) => renderer.show(asset),
             Assets::Walk(ref asset, _) => renderer.show(asset),
-            Assets::Jump(ref asset, _) => renderer.show(asset),
         }
     }
 }

@@ -87,7 +87,7 @@ impl<T: Texture> Button<T> {
                 let dst = s.dst;
                 Button::Idle(Image { texture, dst }, s.sheet, picker.texture)
             }
-            b @ _ => b,
+            b => b,
         }
     }
 
@@ -130,7 +130,7 @@ impl<T: Texture> Assets<T> {
             let pos = align::right(640 - distance / 2).bottom(300);
             let mut image = asset_manager.image(asset::Texture::Husky, pos)?.scale(2);
             let sheet = asset_manager.sheet(asset::Animation::Husky)?;
-            Button::Idle(image, sheet, picker.clone())
+            Button::Idle(image, sheet, Rc::clone(&picker))
         };
         let duck = {
             let pos = align::left(640 + distance / 2).bottom(300);

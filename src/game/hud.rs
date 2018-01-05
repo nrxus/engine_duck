@@ -17,7 +17,7 @@ pub struct Hud {
 impl Default for Hud {
     fn default() -> Self {
         Hud {
-            timer: Duration::from_secs(3),
+            timer: Duration::from_secs(100),
             score: 0,
         }
     }
