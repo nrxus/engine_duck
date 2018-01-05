@@ -94,8 +94,7 @@ impl Player {
 
 pub enum Assets<T> {
     Idle(Image<T>, TileSheet<T>),
-    Walk(Sprite<T>, Rc<T>),
-    Jump(Image<T>, TileSheet<T>),
+    Animated(Sprite<T>, Rc<T>),
 }
 
 impl<T: Texture> Assets<T> {
@@ -116,40 +115,27 @@ impl<T: Texture> Assets<T> {
 impl<T> Assets<T> {
     pub fn next(self, player: &Player) -> Self {
         match player.action {
-            Action::Idle { .. } => {
+            Action::Idle { .. } | Action::Jump { .. } => {
                 let (image, sheet) = match self {
-                    Assets::Walk(s, texture) => (
+                    Assets::Animated(s, texture) => (
                         Image {
                             texture,
                             dst: s.dst,
                         },
                         s.sheet,
                     ),
-                    Assets::Idle(i, t) | Assets::Jump(i, t) => (i, t),
+                    Assets::Idle(i, t) => (i, t),
                 };
                 Assets::Idle(image, sheet)
-            }
-            Action::Jump { .. } => {
-                let (image, sheet) = match self {
-                    Assets::Walk(s, texture) => (
-                        Image {
-                            texture,
-                            dst: s.dst,
-                        },
-                        s.sheet,
-                    ),
-                    Assets::Idle(i, t) | Assets::Jump(i, t) => (i, t),
-                };
-                Assets::Jump(image, sheet)
             }
             Action::Walk { ref animator, .. } => {
                 let tile = animator.frame();
                 let (sprite, texture) = match self {
-                    Assets::Walk(mut sprite, texture) => {
+                    Assets::Animated(mut sprite, texture) => {
                         sprite.tile = tile;
                         (sprite, texture)
                     }
-                    Assets::Idle(i, sheet) | Assets::Jump(i, sheet) => (
+                    Assets::Idle(i, sheet) => (
                         Sprite {
                             sheet,
                             tile,
@@ -158,7 +144,7 @@ impl<T> Assets<T> {
                         i.texture,
                     ),
                 };
-                Assets::Walk(sprite, texture)
+                Assets::Animated(sprite, texture)
             }
         }
     }
@@ -167,8 +153,8 @@ impl<T> Assets<T> {
 impl<R: Renderer, T: Draw<R>> Show<R> for Assets<T> {
     fn show(&self, renderer: &mut R) -> Result<()> {
         match *self {
-            Assets::Idle(ref asset, _) | Assets::Jump(ref asset, _) => renderer.show(asset),
-            Assets::Walk(ref asset, _) => renderer.show(asset),
+            Assets::Idle(ref asset, _) => renderer.show(asset),
+            Assets::Animated(ref asset, _) => renderer.show(asset),
         }
     }
 }
