@@ -3,7 +3,6 @@ use asset::{self, Sprite};
 use data::Animators;
 pub use game::player_select::PlayerKind as Kind;
 
-use glm;
 use moho::animation::TileSheet;
 use moho::animation::animator::{self, Animator};
 use moho::input;
@@ -14,16 +13,22 @@ use sdl2::keyboard::Keycode;
 use std::rc::Rc;
 use std::time::Duration;
 
+#[derive(Clone, Copy)]
+enum Direction {
+    Left,
+    Right,
+}
+
 enum Action {
     Idle {
         animator: animator::Data,
     },
     Walk {
-        velocity: f64,
+        direction: Direction,
         animator: Animator,
     },
     Jump {
-        velocity: glm::DVec2,
+        direction: Option<Direction>,
         animator: animator::Data,
     },
 }
@@ -46,46 +51,50 @@ impl Player {
     }
 
     pub fn update(&mut self, input: &input::State, elapsed: Duration) {
-        let x_vel = {
+        let direction = {
             let left = input.is_key_down(Keycode::Left);
             let right = input.is_key_down(Keycode::Right);
             if left && !right {
-                -2
+                Some(Direction::Left)
             } else if right && !left {
-                2
+                Some(Direction::Right)
             } else {
-                0
+                None
             }
         };
         let up = input.is_key_down(Keycode::Space);
         self.action = match self.action {
             Action::Idle { animator } | Action::Jump { animator, .. } => if up {
                 Action::Jump {
-                    velocity: glm::dvec2(f64::from(x_vel), 10.),
+                    direction,
                     animator,
                 }
-            } else if x_vel != 0 {
-                Action::Walk {
-                    velocity: f64::from(x_vel),
-                    animator: animator.start(),
-                }
             } else {
-                Action::Idle { animator }
+                match direction {
+                    Some(direction) => Action::Walk {
+                        direction,
+                        animator: animator.start(),
+                    },
+                    None => Action::Idle { animator },
+                }
             },
             Action::Walk { mut animator, .. } => if up {
                 Action::Jump {
-                    velocity: glm::dvec2(f64::from(x_vel), 10.),
+                    direction,
                     animator: animator.stop(),
-                }
-            } else if x_vel != 0 {
-                animator.animate(elapsed);
-                Action::Walk {
-                    velocity: f64::from(x_vel),
-                    animator,
                 }
             } else {
-                Action::Idle {
-                    animator: animator.stop(),
+                match direction {
+                    Some(direction) => {
+                        animator.animate(elapsed);
+                        Action::Walk {
+                            direction,
+                            animator,
+                        }
+                    }
+                    None => Action::Idle {
+                        animator: animator.stop(),
+                    },
                 }
             },
         }
@@ -126,7 +135,7 @@ impl<T> Assets<T> {
                 ),
                 b => b,
             },
-            Action::Jump { ref velocity, .. } => {
+            Action::Jump { direction, .. } => {
                 let (image, sheet, f) = match self {
                     Assets::Animated(s, texture, f) => (
                         Image {
@@ -138,24 +147,22 @@ impl<T> Assets<T> {
                     ),
                     Assets::Idle(i, t, f) => (i, t, f),
                 };
-                let flip = if velocity.x == 0. {
-                    f
-                } else if velocity.x < 0. {
-                    Some(options::Flip::Horizontal)
-                } else {
-                    None
-                };
+                let flip = direction
+                    .map(|d| match d {
+                        Direction::Left => Some(options::Flip::Horizontal),
+                        Direction::Right => None,
+                    })
+                    .unwrap_or(f);
                 Assets::Idle(image, sheet, flip)
             }
             Action::Walk {
                 ref animator,
-                ref velocity,
+                direction,
             } => {
                 let tile = animator.frame();
-                let flip = if *velocity < 0. {
-                    Some(options::Flip::Horizontal)
-                } else {
-                    None
+                let flip = match direction {
+                    Direction::Left => Some(options::Flip::Horizontal),
+                    Direction::Right => None,
                 };
                 let (sprite, texture) = match self {
                     Assets::Animated(mut sprite, texture, _) => {
