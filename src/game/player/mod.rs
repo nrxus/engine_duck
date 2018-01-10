@@ -1,37 +1,18 @@
+mod action;
+
 use Result;
 use asset::{self, Sprite};
 use data::Animators;
 pub use game::player_select::PlayerKind as Kind;
+pub use self::action::{Action, Direction};
 
 use moho::animation::TileSheet;
-use moho::animation::animator::{self, Animator};
 use moho::input;
 use moho::renderer::{align, options, Draw, Renderer, Show};
 use moho::texture::{Image, Texture};
-use sdl2::keyboard::Keycode;
 
 use std::rc::Rc;
 use std::time::Duration;
-
-#[derive(Clone, Copy)]
-enum Direction {
-    Left,
-    Right,
-}
-
-enum Action {
-    Idle {
-        animator: animator::Data,
-    },
-    Walk {
-        direction: Direction,
-        animator: Animator,
-    },
-    Jump {
-        direction: Option<Direction>,
-        animator: animator::Data,
-    },
-}
 
 pub struct Player {
     kind: Kind,
@@ -51,53 +32,7 @@ impl Player {
     }
 
     pub fn update(&mut self, input: &input::State, elapsed: Duration) {
-        let direction = {
-            let left = input.is_key_down(Keycode::Left);
-            let right = input.is_key_down(Keycode::Right);
-            if left && !right {
-                Some(Direction::Left)
-            } else if right && !left {
-                Some(Direction::Right)
-            } else {
-                None
-            }
-        };
-        let up = input.is_key_down(Keycode::Space);
-        self.action = match self.action {
-            Action::Idle { animator } | Action::Jump { animator, .. } => if up {
-                Action::Jump {
-                    direction,
-                    animator,
-                }
-            } else {
-                match direction {
-                    Some(direction) => Action::Walk {
-                        direction,
-                        animator: animator.start(),
-                    },
-                    None => Action::Idle { animator },
-                }
-            },
-            Action::Walk { mut animator, .. } => if up {
-                Action::Jump {
-                    direction,
-                    animator: animator.stop(),
-                }
-            } else {
-                match direction {
-                    Some(direction) => {
-                        animator.animate(elapsed);
-                        Action::Walk {
-                            direction,
-                            animator,
-                        }
-                    }
-                    None => Action::Idle {
-                        animator: animator.stop(),
-                    },
-                }
-            },
-        }
+        self.action = self.action.update(input, elapsed);
     }
 }
 
@@ -118,6 +53,15 @@ impl<T: Texture> Assets<T> {
         let image = asset_manager.image(texture, align::left(0).top(200))?;
         let sheet = asset_manager.sheet(animation)?;
         Ok(Assets::Idle(image, sheet, None))
+    }
+}
+
+impl From<Direction> for Option<options::Flip> {
+    fn from(direction: Direction) -> Option<options::Flip> {
+        match direction {
+            Direction::Left => Some(options::Flip::Horizontal),
+            Direction::Right => None,
+        }
     }
 }
 
@@ -147,12 +91,7 @@ impl<T> Assets<T> {
                     ),
                     Assets::Idle(i, t, f) => (i, t, f),
                 };
-                let flip = direction
-                    .map(|d| match d {
-                        Direction::Left => Some(options::Flip::Horizontal),
-                        Direction::Right => None,
-                    })
-                    .unwrap_or(f);
+                let flip = direction.map(Option::<options::Flip>::from).unwrap_or(f);
                 Assets::Idle(image, sheet, flip)
             }
             Action::Walk {
@@ -160,10 +99,6 @@ impl<T> Assets<T> {
                 direction,
             } => {
                 let tile = animator.frame();
-                let flip = match direction {
-                    Direction::Left => Some(options::Flip::Horizontal),
-                    Direction::Right => None,
-                };
                 let (sprite, texture) = match self {
                     Assets::Animated(mut sprite, texture, _) => {
                         sprite.tile = tile;
@@ -178,7 +113,7 @@ impl<T> Assets<T> {
                         i.texture,
                     ),
                 };
-                Assets::Animated(sprite, texture, flip)
+                Assets::Animated(sprite, texture, direction.into())
             }
         }
     }
