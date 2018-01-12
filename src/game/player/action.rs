@@ -32,40 +32,34 @@ impl Action {
 
         let direction = input.hkey();
         let up = input.is_key_down(Keycode::Space);
-        match self {
-            Idle { animator } | Jump { animator, .. } => if up {
-                Jump {
-                    direction,
-                    animator,
-                }
-            } else {
-                match direction {
-                    Some(direction) => Walk {
-                        direction,
-                        animator: animator.start(),
+        if up {
+            let animator = match self {
+                Idle { animator } | Jump { animator, .. } => animator,
+                Walk { animator, .. } => animator.stop(),
+            };
+            Jump {
+                animator,
+                direction,
+            }
+        } else {
+            match direction {
+                None => Idle {
+                    animator: match self {
+                        Idle { animator } | Jump { animator, .. } => animator,
+                        Walk { animator, .. } => animator.stop(),
                     },
-                    None => Idle { animator },
-                }
-            },
-            Walk { mut animator, .. } => if up {
-                Jump {
+                },
+                Some(direction) => Walk {
                     direction,
-                    animator: animator.stop(),
-                }
-            } else {
-                match direction {
-                    Some(direction) => {
-                        animator.animate(elapsed);
-                        Walk {
-                            direction,
-                            animator,
+                    animator: match self {
+                        Idle { animator } | Jump { animator, .. } => animator.start(),
+                        Walk { mut animator, .. } => {
+                            animator.animate(elapsed);
+                            animator
                         }
-                    }
-                    None => Idle {
-                        animator: animator.stop(),
                     },
-                }
-            },
+                },
+            }
         }
     }
 }
