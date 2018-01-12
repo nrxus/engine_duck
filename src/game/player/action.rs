@@ -28,37 +28,34 @@ pub enum Action {
 
 impl Action {
     pub fn update(self, input: &input::State, elapsed: Duration) -> Self {
-        use self::Action::*;
-
-        let direction = input.hkey();
-        let up = input.is_key_down(Keycode::Space);
-        if up {
-            let animator = match self {
-                Idle { animator } | Jump { animator, .. } => animator,
-                Walk { animator, .. } => animator.stop(),
-            };
-            Jump {
-                animator,
+        match (input.is_key_down(Keycode::Space), input.hkey()) {
+            (true, direction) => Action::Jump {
+                animator: self.stopped_animator(),
                 direction,
-            }
-        } else {
-            match direction {
-                None => Idle {
-                    animator: match self {
-                        Idle { animator } | Jump { animator, .. } => animator,
-                        Walk { animator, .. } => animator.stop(),
-                    },
-                },
-                Some(direction) => Walk {
-                    direction,
-                    animator: match self {
-                        Idle { animator } | Jump { animator, .. } => animator.start(),
-                        Walk { mut animator, .. } => {
-                            animator.animate(elapsed);
-                            animator
-                        }
-                    },
-                },
+            },
+            (false, None) => Action::Idle {
+                animator: self.stopped_animator(),
+            },
+            (false, Some(direction)) => Action::Walk {
+                animator: self.running_animator(elapsed),
+                direction,
+            },
+        }
+    }
+
+    fn stopped_animator(self) -> animator::Data {
+        match self {
+            Action::Idle { animator } | Action::Jump { animator, .. } => animator,
+            Action::Walk { animator, .. } => animator.stop(),
+        }
+    }
+
+    fn running_animator(self, elapsed: Duration) -> Animator {
+        match self {
+            Action::Idle { animator } | Action::Jump { animator, .. } => animator.start(),
+            Action::Walk { mut animator, .. } => {
+                animator.animate(elapsed);
+                animator
             }
         }
     }
