@@ -3,7 +3,6 @@ use asset::Sprite;
 use moho::animation::animator::{self, Animator};
 use moho::animation::TileSheet;
 use moho::input;
-use moho::renderer::options;
 use moho::texture::Image;
 use sdl2::keyboard::Keycode;
 
@@ -85,16 +84,44 @@ impl Action {
     }
 }
 
-impl From<Direction> for Option<options::Flip> {
-    fn from(direction: Direction) -> Option<options::Flip> {
-        match direction {
-            Direction::Left => Some(options::Flip::Horizontal),
-            Direction::Right => None,
-        }
-    }
-}
-
 pub enum Assets<T> {
     Idle(Image<T>, TileSheet<T>),
     Animated(Sprite<T>, Rc<T>),
+}
+
+impl<T> Assets<T> {
+    pub fn next(self, action: &Action) -> Self {
+        use self::Assets::*;
+
+        match *action {
+            Action::Idle { .. } | Action::Jump { .. } => match self {
+                Animated(s, texture) => Idle(
+                    Image {
+                        texture,
+                        dst: s.dst,
+                    },
+                    s.sheet,
+                ),
+                idle => idle,
+            },
+            Action::Walk { ref animator, .. } => {
+                let tile = animator.frame();
+                let (sprite, texture) = match self {
+                    Animated(mut sprite, texture) => {
+                        sprite.tile = tile;
+                        (sprite, texture)
+                    }
+                    Idle(i, sheet) => (
+                        Sprite {
+                            sheet,
+                            tile,
+                            dst: i.dst,
+                        },
+                        i.texture,
+                    ),
+                };
+                Animated(sprite, texture)
+            }
+        }
+    }
 }
