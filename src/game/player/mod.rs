@@ -70,9 +70,7 @@ impl<T> Assets<T> {
         let action = self.action.next(&player.action);
         let flip = match player.action {
             Action::Idle { .. } => self.flip,
-            Action::Jump { direction, .. } => direction
-                .map(Option::<options::Flip>::from)
-                .unwrap_or(self.flip),
+            Action::Jump { direction, .. } => direction.map(Into::into).unwrap_or(self.flip),
             Action::Walk { direction, .. } => direction.into(),
         };
 
