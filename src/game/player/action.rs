@@ -1,4 +1,6 @@
 use asset::Sprite;
+use utils::InputStateExt;
+use utils::HKey as Direction;
 
 use moho::animation::animator::{self, Animator};
 use moho::animation::TileSheet;
@@ -8,12 +10,6 @@ use sdl2::keyboard::Keycode;
 
 use std::rc::Rc;
 use std::time::Duration;
-
-#[derive(Clone, Copy)]
-pub enum Direction {
-    Left,
-    Right,
-}
 
 #[derive(Clone, Copy)]
 pub enum Action {
@@ -34,17 +30,7 @@ impl Action {
     pub fn update(self, input: &input::State, elapsed: Duration) -> Self {
         use self::Action::*;
 
-        let direction = {
-            let left = input.is_key_down(Keycode::Left);
-            let right = input.is_key_down(Keycode::Right);
-            if left && !right {
-                Some(Direction::Left)
-            } else if right && !left {
-                Some(Direction::Right)
-            } else {
-                None
-            }
-        };
+        let direction = input.hkey();
         let up = input.is_key_down(Keycode::Space);
         match self {
             Idle { animator } | Jump { animator, .. } => if up {

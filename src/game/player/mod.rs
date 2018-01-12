@@ -3,8 +3,9 @@ mod action;
 use Result;
 use asset;
 use data::Animators;
+use utils::HKey as Direction;
 pub use game::player_select::PlayerKind as Kind;
-pub use self::action::{Action, Direction};
+pub use self::action::Action;
 
 use moho::input;
 use moho::renderer::{align, options, Draw, Renderer, Show};
