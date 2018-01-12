@@ -10,6 +10,7 @@ mod data;
 mod asset;
 mod level_viewer;
 mod game;
+mod utils;
 
 use moho::engine::{step, Engine};
 use sdl2::image::{INIT_JPG, INIT_PNG};

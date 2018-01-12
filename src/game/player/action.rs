@@ -1,7 +1,13 @@
+use asset::Sprite;
+
 use moho::animation::animator::{self, Animator};
+use moho::animation::TileSheet;
 use moho::input;
+use moho::renderer::options;
+use moho::texture::Image;
 use sdl2::keyboard::Keycode;
 
+use std::rc::Rc;
 use std::time::Duration;
 
 #[derive(Clone, Copy)]
@@ -77,4 +83,18 @@ impl Action {
             },
         }
     }
+}
+
+impl From<Direction> for Option<options::Flip> {
+    fn from(direction: Direction) -> Option<options::Flip> {
+        match direction {
+            Direction::Left => Some(options::Flip::Horizontal),
+            Direction::Right => None,
+        }
+    }
+}
+
+pub enum Assets<T> {
+    Idle(Image<T>, TileSheet<T>),
+    Animated(Sprite<T>, Rc<T>),
 }
