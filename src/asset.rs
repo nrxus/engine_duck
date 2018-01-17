@@ -1,8 +1,8 @@
 use {data, Result};
 
 use moho::animation::TileSheet;
-use moho::renderer::options::{self, Destination, Options, Position};
-use moho::renderer::{Draw, Renderer, Show};
+use moho::renderer::options::{self, Options};
+use moho::renderer::{Destination, Draw, Position, Renderer, Show};
 use moho::texture::{self, Image};
 use moho::font;
 

@@ -82,11 +82,10 @@ impl<R: Renderer, T: Draw<R> + Texture> Show<R> for Assets<T> {
         };
         //selected + picker
         {
-            let rect = selected.dst.rect();
-            let dst = align::right(rect.x - 10)
-                .middle(rect.y + rect.w / 2)
+            let picker_dst = align::right(selected.dst.left() - 10)
+                .middle(selected.dst.middle())
                 .dims(self.picker.dims());
-            renderer.draw(&*self.picker, options::at(dst))?;
+            renderer.draw(&*self.picker, options::at(picker_dst))?;
             renderer.draw(&*selected.selected, options::at(selected.dst))
         }?;
         //unselected
@@ -101,7 +100,7 @@ mod button {
 
     use glm;
     use moho::font::Font;
-    use moho::renderer::{align, options, ColorRGBA};
+    use moho::renderer::{align, ColorRGBA, Destination};
 
     use std::rc::Rc;
 
@@ -114,7 +113,7 @@ mod button {
     pub struct Assets<T> {
         pub idle: Rc<T>,
         pub selected: Rc<T>,
-        pub dst: options::Destination,
+        pub dst: Destination,
     }
 
     impl<T> Assets<T> {

@@ -101,9 +101,8 @@ impl<T: Texture> Button<T> {
                 let dst = i.dst;
                 let picker = {
                     let texture = picker;
-                    let rect = dst.rect();
-                    let dst = align::top(rect.y + rect.w + 10)
-                        .center(rect.x + rect.z / 2)
+                    let dst = align::top(dst.bottom() + 10)
+                        .center(dst.center())
                         .dims(texture.dims());
                     Image { texture, dst }
                 };

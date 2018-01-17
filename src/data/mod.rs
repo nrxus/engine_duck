@@ -5,7 +5,7 @@ use Result;
 
 use glm;
 use moho::animation::animator;
-use moho::renderer::options::{Destination, Position};
+use moho::renderer::{Destination, Position};
 use serde_yaml;
 
 use std::fs::File;

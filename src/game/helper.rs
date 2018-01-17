@@ -3,7 +3,7 @@ use {data, Result};
 
 use moho::{font, texture};
 use moho::animation::TileSheet;
-use moho::renderer::options::Position;
+use moho::renderer::Position;
 use moho::texture::Image;
 
 use std::rc::Rc;
