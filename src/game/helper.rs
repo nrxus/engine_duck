@@ -23,12 +23,12 @@ where
     TL: texture::Loader<'t>,
     TL::Texture: texture::Texture,
     FL: font::Loader<'f> + 'f,
-    FL::Font: font::Font<Texture = TL::Texture>,
+    FL::Font: font::Font<Texture = Rc<TL::Texture>>,
 {
-    type Texture = TL::Texture;
+    type Texture = Rc<TL::Texture>;
     type Font = FL::Font;
 
-    fn texture(&mut self, asset: Texture) -> Result<Rc<Self::Texture>> {
+    fn texture(&mut self, asset: Texture) -> Result<Self::Texture> {
         let data = self.data.texture(asset);
         self.texture_manager
             .load(&format!("media/sprites/{}", data.texture))

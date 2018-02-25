@@ -44,7 +44,7 @@ pub struct Assets<T> {
     gui: gui::Assets<T>,
 }
 
-impl<T: Texture> Assets<T> {
+impl<T: Texture + Clone> Assets<T> {
     pub fn load<AM>(asset_manager: &mut AM) -> Result<Self>
     where
         AM: asset::Manager<Texture = T>,

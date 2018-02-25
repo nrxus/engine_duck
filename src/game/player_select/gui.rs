@@ -9,7 +9,6 @@ use moho::renderer::{align, Draw, Renderer, Show};
 use moho::texture::{Image, Texture};
 use sdl2::keyboard::Keycode;
 
-use std::rc::Rc;
 use std::time::Duration;
 
 pub enum ButtonKind {
@@ -76,8 +75,8 @@ impl Gui {
 }
 
 enum Button<T> {
-    Selected(Sprite<T>, Rc<T>, Image<T>),
-    Idle(Image<T>, TileSheet<T>, Rc<T>),
+    Selected(Sprite<T>, T, Image<T>),
+    Idle(Image<T>, TileSheet<T>, T),
 }
 
 impl<T: Texture> Button<T> {
@@ -118,7 +117,7 @@ pub struct Assets<T> {
     husky: Button<T>,
 }
 
-impl<T: Texture> Assets<T> {
+impl<T: Texture + Clone> Assets<T> {
     pub fn load<AM>(asset_manager: &mut AM) -> Result<Self>
     where
         AM: asset::Manager<Texture = T>,
@@ -129,7 +128,7 @@ impl<T: Texture> Assets<T> {
             let pos = align::right(640 - distance / 2).bottom(300);
             let mut image = asset_manager.image(asset::Texture::Husky, pos)?.scale(2);
             let sheet = asset_manager.sheet(asset::Animation::Husky)?;
-            Button::Idle(image, sheet, Rc::clone(&picker))
+            Button::Idle(image, sheet, picker.clone())
         };
         let duck = {
             let pos = align::left(640 + distance / 2).bottom(300);

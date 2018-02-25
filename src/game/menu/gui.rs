@@ -8,8 +8,6 @@ use moho::texture::Texture;
 use moho::renderer::{align, options, Draw, Renderer, Show};
 use sdl2::keyboard::Keycode;
 
-use std::rc::Rc;
-
 pub struct Gui {
     selected: button::Kind,
 }
@@ -42,11 +40,11 @@ pub struct Assets<T> {
     selected: button::Kind,
     new_game: button::Assets<T>,
     high_score: button::Assets<T>,
-    picker: Rc<T>,
+    picker: T,
 }
 
 impl<T> Assets<T> {
-    pub fn load<F>(font: &F, picker: Rc<T>, gui: &Gui) -> Result<Self>
+    pub fn load<F>(font: &F, picker: T, gui: &Gui) -> Result<Self>
     where
         F: Font<Texture = T>,
     {
@@ -85,8 +83,8 @@ impl<R: Renderer, T: Draw<R> + Texture> Show<R> for Assets<T> {
             let picker_dst = align::right(selected.dst.left() - 10)
                 .middle(selected.dst.middle())
                 .dims(self.picker.dims());
-            renderer.draw(&*self.picker, options::at(picker_dst))?;
-            renderer.draw(&*selected.selected, options::at(selected.dst))
+            renderer.draw(&self.picker, options::at(picker_dst))?;
+            renderer.draw(&selected.selected, options::at(selected.dst))
         }?;
         //unselected
         {

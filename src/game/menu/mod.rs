@@ -9,8 +9,6 @@ use moho::font::Font;
 use moho::texture::{Image, Texture};
 use moho::renderer::{align, ColorRGBA, Draw, Renderer, Show};
 
-use std::rc::Rc;
-
 #[derive(Default)]
 pub struct Menu {
     gui: Gui,
@@ -51,7 +49,7 @@ impl<T: Texture> Assets<T> {
             let font = asset_manager.font(asset::Font::KenPixel, 32)?;
             let color = ColorRGBA(255, 255, 0, 255);
             let text = "<Use Arrow Keys to select option; then press Enter>";
-            let texture = font.texturize(text, &color).map(Rc::new)?;
+            let texture = font.texturize(text, &color)?;
             let dims = texture.dims();
             let dst = align::bottom(720 - dims.y as i32).center(640).dims(dims);
             Image { texture, dst }

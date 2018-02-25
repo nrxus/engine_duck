@@ -54,7 +54,7 @@ pub enum Assets<T, F> {
     GamePlay(game_play::Assets<T, F>),
 }
 
-impl<T: Texture, F: Font<Texture = T>> Assets<T, F> {
+impl<T: Texture + Clone, F: Font<Texture = T>> Assets<T, F> {
     pub fn load<AM>(screen: &Screen, asset_manager: &mut AM) -> Result<Self>
     where
         AM: asset::Manager<Texture = T, Font = F>,
@@ -72,7 +72,7 @@ impl<T: Texture, F: Font<Texture = T>> Assets<T, F> {
     }
 }
 
-impl<T: Texture, F: Font<Texture = T>> Assets<T, F> {
+impl<T: Texture + Clone, F: Font<Texture = T>> Assets<T, F> {
     pub fn next<AM>(
         self,
         screen: &Screen,

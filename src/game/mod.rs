@@ -21,6 +21,7 @@ use moho::renderer::{self, ColorRGBA, Draw, Renderer};
 use moho::texture::{self, Texture};
 
 use std::time::Duration;
+use std::rc::Rc;
 
 type State<W> = moho::State<W, <W as engine::World>::Quit>;
 
@@ -34,7 +35,7 @@ where
     E: input::EventPump,
     C: renderer::Canvas,
     FL: moho::font::Loader<'f>,
-    FL::Font: moho::font::Font<Texture = T>,
+    FL::Font: moho::font::Font<Texture = Rc<T>>,
     TL: texture::Loader<'t, Texture = T>,
 {
     let font_manager = moho::font::Manager::new(font_loader);
@@ -79,7 +80,10 @@ impl engine::World for World {
     }
 }
 
-impl<AM: asset::Manager> NextScene<World, fixed::State, AM> for Assets<AM::Texture, AM::Font> {
+impl<AM: asset::Manager> NextScene<World, fixed::State, AM> for Assets<AM::Texture, AM::Font>
+where
+    AM::Texture: Clone,
+{
     fn next(self, game: &World, step: &fixed::State, helper: &mut AM) -> Result<Self> {
         self.screen
             .next(&game.screen, step, helper)
@@ -91,7 +95,7 @@ pub struct Assets<T, F> {
     screen: screen::Assets<T, F>,
 }
 
-impl<T: Texture, F: Font<Texture = T>> Assets<T, F> {
+impl<T: Texture + Clone, F: Font<Texture = T>> Assets<T, F> {
     fn load<AM>(world: &World, helper: &mut AM) -> Result<Self>
     where
         AM: asset::Manager<Texture = T, Font = F>,

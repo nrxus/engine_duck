@@ -45,7 +45,7 @@ pub trait Manager {
     type Texture: texture::Texture;
     type Font: font::Font<Texture = Self::Texture>;
 
-    fn texture(&mut self, texture: Texture) -> Result<Rc<Self::Texture>>;
+    fn texture(&mut self, texture: Texture) -> Result<Self::Texture>;
     fn sheet(&mut self, animation: Animation) -> Result<TileSheet<Self::Texture>>;
     fn image(&mut self, texture: Texture, pos: Position) -> Result<Image<Self::Texture>>;
     fn sprite(&mut self, animaiton: Animation, pos: Position) -> Result<Sprite<Self::Texture>>;

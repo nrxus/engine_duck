@@ -8,7 +8,6 @@ use moho::input;
 use moho::texture::Image;
 use sdl2::keyboard::Keycode;
 
-use std::rc::Rc;
 use std::time::Duration;
 
 #[derive(Clone, Copy)]
@@ -63,7 +62,7 @@ impl Action {
 
 pub enum Assets<T> {
     Idle(Image<T>, TileSheet<T>),
-    Animated(Sprite<T>, Rc<T>),
+    Animated(Sprite<T>, T),
 }
 
 impl<T> Assets<T> {
