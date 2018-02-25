@@ -4,7 +4,7 @@ use Result;
 
 use moho::animation::animator::Animator;
 use moho::font::Font;
-use moho::renderer::{align, ColorRGBA, Draw, Renderer, Show};
+use moho::renderer::{align, ColorRGBA};
 use moho::texture::{Image, Texture};
 
 use std::time::Duration;
@@ -32,6 +32,7 @@ impl Guide {
     }
 }
 
+#[derive(Show)]
 pub struct Assets<T> {
     collect: Image<T>,
     avoid: Image<T>,
@@ -86,15 +87,5 @@ impl<T> Assets<T> {
         self.coin.tile = world.coin.frame();
         self.cat.tile = world.cat.frame();
         self
-    }
-}
-
-impl<R: Renderer, T: Draw<R>> Show<R> for Assets<T> {
-    fn show(&self, renderer: &mut R) -> Result<()> {
-        renderer.show(&self.collect)?;
-        renderer.show(&self.gem)?;
-        renderer.show(&self.coin)?;
-        renderer.show(&self.avoid)?;
-        renderer.show(&self.cat)
     }
 }

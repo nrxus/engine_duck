@@ -7,7 +7,7 @@ use {asset, Result};
 use moho::{self, input};
 use moho::font::Font;
 use moho::texture::{Image, Texture};
-use moho::renderer::{align, ColorRGBA, Draw, Renderer, Show};
+use moho::renderer::{align, ColorRGBA};
 
 #[derive(Default)]
 pub struct Menu {
@@ -20,6 +20,7 @@ impl Menu {
     }
 }
 
+#[derive(Show)]
 pub struct Assets<T> {
     husky: Image<T>,
     duck: Image<T>,
@@ -74,15 +75,5 @@ impl<T> Assets<T> {
     pub fn next(mut self, menu: &Menu) -> Self {
         self.gui = self.gui.next(&menu.gui);
         self
-    }
-}
-
-impl<R: Renderer, T: Draw<R> + Texture> Show<R> for Assets<T> {
-    fn show(&self, renderer: &mut R) -> Result<()> {
-        renderer.show(&self.husky)?;
-        renderer.show(&self.duck)?;
-        renderer.show(&self.heart)?;
-        renderer.show(&self.instructions)?;
-        renderer.show(&self.gui)
     }
 }

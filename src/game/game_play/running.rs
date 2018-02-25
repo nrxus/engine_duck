@@ -6,7 +6,6 @@ use game::player::{self, Player};
 use moho::{self, input};
 use moho::engine::step::fixed;
 use moho::font::Font;
-use moho::renderer::{Draw, Renderer, Show};
 use moho::texture::Texture;
 
 use std::time::Duration;
@@ -34,6 +33,7 @@ impl Running {
     }
 }
 
+#[derive(Show)]
 pub struct Assets<T, F> {
     hud: hud::Assets<T, F>,
     player: player::Assets<T>,
@@ -56,12 +56,5 @@ impl<T: Texture, F: Font<Texture = T>> Assets<T, F> {
             hud: hud::Assets::load(&world.hud, asset_manager)?,
             player: player::Assets::load(&world.player, asset_manager)?,
         })
-    }
-}
-
-impl<R: Renderer, T: Draw<R> + Texture, F> Show<R> for Assets<T, F> {
-    fn show(&self, renderer: &mut R) -> Result<()> {
-        renderer.show(&self.hud)?;
-        renderer.show(&self.player)
     }
 }

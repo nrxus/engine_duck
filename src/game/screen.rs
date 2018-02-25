@@ -7,7 +7,6 @@ use game::player_select::{self, PlayerSelect};
 use moho::{self, input};
 use moho::engine::step::fixed;
 use moho::font::Font;
-use moho::renderer::{Draw, Renderer, Show};
 use moho::texture::Texture;
 
 use std::time::Duration;
@@ -47,6 +46,7 @@ pub enum Screen {
     GamePlay(GamePlay),
 }
 
+#[derive(Show)]
 pub enum Assets<T, F> {
     Menu(menu::Assets<T>),
     HighScore(high_score::Assets<T>),
@@ -99,17 +99,6 @@ impl<T: Texture + Clone, F: Font<Texture = T>> Assets<T, F> {
                 Assets::GamePlay(ps) => ps.next(world, step, asset_manager),
                 _ => game_play::Assets::load(world, asset_manager),
             }.map(Assets::GamePlay),
-        }
-    }
-}
-
-impl<R: Renderer, T: Draw<R> + Texture, F> Show<R> for Assets<T, F> {
-    fn show(&self, renderer: &mut R) -> Result<()> {
-        match *self {
-            Assets::Menu(ref m) => renderer.show(m),
-            Assets::HighScore(ref hs) => renderer.show(hs),
-            Assets::PlayerSelect(ref ps) => renderer.show(ps),
-            Assets::GamePlay(ref gp) => renderer.show(gp),
         }
     }
 }

@@ -10,7 +10,7 @@ use {asset, Result};
 use moho::{self, input};
 use moho::font::Font;
 use moho::texture::{Image, Texture};
-use moho::renderer::{align, ColorRGBA, Draw, Renderer, Show};
+use moho::renderer::{align, ColorRGBA};
 
 use std::time::Duration;
 
@@ -37,6 +37,7 @@ impl PlayerSelect {
     }
 }
 
+#[derive(Show)]
 pub struct Assets<T> {
     title: Image<T>,
     instructions: Image<T>,
@@ -79,14 +80,5 @@ impl<T: Texture + Clone> Assets<T> {
         self.guide = self.guide.next(&world.guide);
         self.gui = self.gui.next(&world.gui);
         self
-    }
-}
-
-impl<R: Renderer, T: Draw<R>> Show<R> for Assets<T> {
-    fn show(&self, renderer: &mut R) -> Result<()> {
-        renderer.show(&self.title)?;
-        renderer.show(&self.guide)?;
-        renderer.show(&self.instructions)?;
-        renderer.show(&self.gui)
     }
 }

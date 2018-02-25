@@ -1,5 +1,6 @@
 extern crate failure;
 extern crate glm;
+#[macro_use]
 extern crate moho;
 extern crate sdl2;
 #[macro_use]

@@ -3,7 +3,7 @@ use {asset, Result};
 use moho::{self, input};
 use moho::font::Font;
 use moho::texture::{Image, Texture};
-use moho::renderer::{align, ColorRGBA, Draw, Renderer, Show};
+use moho::renderer::{align, ColorRGBA};
 use sdl2::keyboard::Keycode;
 
 pub struct HighScore {}
@@ -18,6 +18,7 @@ impl HighScore {
     }
 }
 
+#[derive(Show)]
 pub struct Assets<T> {
     title: Image<T>,
     instructions: Image<T>,
@@ -67,13 +68,5 @@ impl<T: Texture> Assets<T> {
             instructions,
             scores,
         })
-    }
-}
-
-impl<R: Renderer, T: Draw<R>> Show<R> for Assets<T> {
-    fn show(&self, renderer: &mut R) -> Result<()> {
-        renderer.show(&self.title)?;
-        renderer.show(&self.instructions)?;
-        self.scores.iter().map(|s| renderer.show(s)).collect()
     }
 }

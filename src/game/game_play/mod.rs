@@ -10,7 +10,6 @@ use game::player;
 use moho::{self, input};
 use moho::engine::step::fixed;
 use moho::font::Font;
-use moho::renderer::{Draw, Renderer, Show};
 use moho::texture::Texture;
 
 use std::time::Duration;
@@ -37,6 +36,7 @@ impl GamePlay {
     }
 }
 
+#[derive(Show)]
 pub enum Assets<T, F> {
     Running(running::Assets<T, F>),
     TimeUp(timeup::Assets<T, F>),
@@ -75,15 +75,6 @@ impl<T: Texture, F: Font<Texture = T>> Assets<T, F> {
                 running::Assets::load(world, asset_manager).map(Assets::Running)
             }
             _ => unreachable!("cannot load timeup state without a previous running state"),
-        }
-    }
-}
-
-impl<R: Renderer, T: Draw<R> + Texture, F> Show<R> for Assets<T, F> {
-    fn show(&self, renderer: &mut R) -> Result<()> {
-        match *self {
-            Assets::Running(ref assets) => renderer.show(assets),
-            Assets::TimeUp(ref assets) => renderer.show(assets),
         }
     }
 }

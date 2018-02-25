@@ -74,7 +74,7 @@ impl Gui {
     }
 }
 
-enum Button<T> {
+pub enum Button<T> {
     Selected(Sprite<T>, T, Image<T>),
     Idle(Image<T>, TileSheet<T>, T),
 }
@@ -112,6 +112,7 @@ impl<T: Texture> Button<T> {
     }
 }
 
+#[derive(Show)]
 pub struct Assets<T> {
     duck: Button<T>,
     husky: Button<T>,
@@ -167,12 +168,5 @@ impl<T: Draw<R>, R: Renderer> Show<R> for Button<T> {
             }
             Button::Idle(ref i, _, _) => renderer.show(i),
         }
-    }
-}
-
-impl<T: Draw<R>, R: Renderer> Show<R> for Assets<T> {
-    fn show(&self, renderer: &mut R) -> Result<()> {
-        renderer.show(&self.duck)?;
-        renderer.show(&self.husky)
     }
 }
