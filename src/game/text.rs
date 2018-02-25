@@ -54,8 +54,8 @@ impl<T, F: Font<Texture = T>, V: Cached + Debug> Text<T, F, V> {
     }
 }
 
-impl<T: Texture, F, V: Cached> Text<T, F, V> {
-    pub fn dims(&self) -> glm::UVec2 {
+impl<T: Texture, F, V: Cached> Texture for Text<T, F, V> {
+    fn dims(&self) -> glm::UVec2 {
         self.texture.dims()
     }
 }

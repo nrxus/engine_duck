@@ -3,8 +3,8 @@ use game::text::{self, Text};
 
 use moho;
 use moho::font::Font;
-use moho::renderer::{align, options, Draw, Renderer, Show};
-use moho::texture::Texture;
+use moho::renderer::align;
+use moho::texture::{Image, Texture};
 
 use std::time::Duration;
 use std::rc::Rc;
@@ -52,14 +52,15 @@ impl text::Cached for u32 {
     }
 }
 
+#[derive(Show)]
 pub struct Assets<T, F> {
-    timer: Text<T, F, Duration>,
-    score: Text<T, F, u32>,
+    timer: Image<Text<T, F, Duration>>,
+    score: Image<Text<T, F, u32>>,
 }
 
 impl<T, F: Font<Texture = T>> Assets<T, F> {
     pub fn next(mut self, hud: &Hud) -> Result<Self> {
-        self.timer.update(hud.timer)?;
+        self.timer.texture.update(hud.timer)?;
         Ok(self)
     }
 }
@@ -71,21 +72,10 @@ impl<T: Texture, F: Font<Texture = T>> Assets<T, F> {
     {
         let font = asset_manager.font(asset::Font::KenPixel, 32)?;
         Ok(Assets {
-            timer: Text::load(world.timer, Rc::clone(&font), |v| format!("Time: {:03}", v))?,
-            score: Text::load(world.score, font, |v| format!("Score: {:05}", v))?,
+            timer: Text::load(world.timer, Rc::clone(&font), |v| format!("Time: {:03}", v))?
+                .at(align::top(0).center(960)),
+            score: Text::load(world.score, font, |v| format!("Score: {:05}", v))?
+                .at(align::top(0).center(320)),
         })
-    }
-}
-
-impl<R: Renderer, T: Draw<R> + Texture, F> Show<R> for Assets<T, F> {
-    fn show(&self, renderer: &mut R) -> Result<()> {
-        renderer.draw(
-            &self.timer,
-            options::at(align::top(0).center(960).dims(self.timer.dims())),
-        )?;
-        renderer.draw(
-            &self.score,
-            options::at(align::top(0).center(320).dims(self.score.dims())),
-        )
     }
 }
