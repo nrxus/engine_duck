@@ -38,7 +38,7 @@ struct FontLoader<FL>(FL);
 
 impl<'t, T> FontLoader<moho::sdl2_helpers::font::Loader<'t, T>> {
     fn new(texture_loader: &'t sdl2::render::TextureCreator<T>) -> Self {
-        FontLoader(moho::sdl2_helpers::font::Loader::load(&texture_loader).unwrap())
+        FontLoader(moho::sdl2_helpers::font::Loader::load(texture_loader).unwrap())
     }
 }
 
