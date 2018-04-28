@@ -1,10 +1,10 @@
 use asset::{self, Animation, Font, Sprite, Texture};
 use {data, Result};
 
-use moho::{font, texture};
 use moho::animation::TileSheet;
 use moho::renderer::Position;
 use moho::texture::Image;
+use moho::{font, texture};
 
 use std::rc::Rc;
 

@@ -3,14 +3,14 @@ mod timeup;
 
 use self::running::Running;
 use self::timeup::TimeUp;
-use {asset, Result};
 use data::Animators;
 use game::player;
+use {asset, Result};
 
-use moho::{self, input};
 use moho::engine::step::fixed;
 use moho::font::Font;
 use moho::texture::Texture;
+use moho::{self, input};
 
 use std::time::Duration;
 
@@ -43,33 +43,32 @@ pub enum Assets<T, F> {
 }
 
 impl<T: Texture, F: Font<Texture = T>> Assets<T, F> {
-    pub fn next<AM>(
+    pub fn next(
         self,
         world: &GamePlay,
         step: &fixed::State,
-        asset_manager: &mut AM,
-    ) -> Result<Self>
-    where
-        AM: asset::Manager<Texture = T, Font = F>,
-    {
+        asset_manager: &mut impl asset::Manager<Texture = T, Font = F>,
+    ) -> Result<Self> {
         match *world {
             GamePlay::Running(ref world) => match self {
                 Assets::Running(r) => r.next(world, step),
                 _ => running::Assets::load(world, asset_manager),
-            }.map(Assets::Running),
+            }
+            .map(Assets::Running),
             GamePlay::TimeUp(_) => match self {
                 Assets::TimeUp(t) => Ok(t),
                 Assets::Running(r) => timeup::Assets::load(asset_manager, r),
-            }.map(Assets::TimeUp),
+            }
+            .map(Assets::TimeUp),
         }
     }
 }
 
 impl<T: Texture, F: Font<Texture = T>> Assets<T, F> {
-    pub fn load<AM>(world: &GamePlay, asset_manager: &mut AM) -> Result<Self>
-    where
-        AM: asset::Manager<Texture = T, Font = F>,
-    {
+    pub fn load(
+        world: &GamePlay,
+        asset_manager: &mut impl asset::Manager<Texture = T, Font = F>,
+    ) -> Result<Self> {
         match *world {
             GamePlay::Running(ref world) => {
                 running::Assets::load(world, asset_manager).map(Assets::Running)

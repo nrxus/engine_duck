@@ -1,11 +1,11 @@
 mod action;
 
-use Result;
+pub use self::action::Action;
 use asset;
 use data::Animators;
-use utils::HKey as Direction;
 pub use game::player_select::PlayerKind as Kind;
-pub use self::action::Action;
+use utils::HKey as Direction;
+use Result;
 
 use moho::input;
 use moho::renderer::{align, options, Draw, Renderer, Show};
@@ -41,10 +41,10 @@ pub struct Assets<T> {
 }
 
 impl<T: Texture> Assets<T> {
-    pub fn load<AM>(player: &Player, asset_manager: &mut AM) -> Result<Self>
-    where
-        AM: asset::Manager<Texture = T>,
-    {
+    pub fn load(
+        player: &Player,
+        asset_manager: &mut impl asset::Manager<Texture = T>,
+    ) -> Result<Self> {
         let (texture, animation) = match player.kind {
             Kind::Duck => (asset::Texture::Duck, asset::Animation::Duck),
             Kind::Husky => (asset::Texture::Husky, asset::Animation::Husky),

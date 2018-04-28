@@ -1,23 +1,19 @@
 use Result;
 
-use moho::{self, input};
-use moho::engine::{self, Engine, NextScene};
 use moho::engine::step::fixed;
+use moho::engine::{self, Engine, NextScene};
 use moho::renderer;
+use moho::{self, input};
 
 use std::time::Duration;
 
-pub fn run<E, C>(engine: &mut Engine<E, C, fixed::FixedUpdate>) -> Result<()>
-where
-    E: input::EventPump,
-    C: renderer::Canvas,
-{
+pub fn run(
+    engine: &mut Engine<impl input::EventPump, impl renderer::Canvas, fixed::FixedUpdate>,
+) -> Result<()> {
     let world = World {};
     let helper = Helper {};
     let assets = Assets {};
-    engine
-        .run::<Assets, _, _>(world, assets, helper)
-        .map_err(Into::into)
+    engine.run(world, assets, helper).map_err(Into::into)
 }
 
 pub struct World {}

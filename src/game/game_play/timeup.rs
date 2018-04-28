@@ -1,11 +1,11 @@
-use {asset, Result};
 use super::running;
+use {asset, Result};
 
 use glm;
-use moho::{self, input};
-use moho::renderer::{align, ColorRGBA, Draw, Renderer, Show};
 use moho::font::Font;
+use moho::renderer::{align, ColorRGBA, Draw, Renderer, Show};
 use moho::texture::{Image, Texture};
+use moho::{self, input};
 use sdl2::keyboard::Keycode;
 
 pub struct TimeUp {}
@@ -27,16 +27,18 @@ pub struct Assets<T, F> {
 }
 
 impl<T: Texture, F> Assets<T, F> {
-    pub fn load<AM>(asset_manager: &mut AM, game: running::Assets<T, F>) -> Result<Self>
-    where
-        AM: asset::Manager<Texture = T>,
-    {
+    pub fn load(
+        asset_manager: &mut impl asset::Manager<Texture = T>,
+        game: running::Assets<T, F>,
+    ) -> Result<Self> {
         let font = asset_manager.font(asset::Font::KenPixel, 48)?;
         Ok(Assets {
             game,
-            alert: font.texturize("TIME'S UP", &ColorRGBA(255, 0, 0, 255))?
+            alert: font
+                .texturize("TIME'S UP", &ColorRGBA(255, 0, 0, 255))?
                 .at(align::bottom(360).center(640)),
-            instructions: font.texturize("<PRESS ENTER>", &ColorRGBA(255, 255, 255, 255))?
+            instructions: font
+                .texturize("<PRESS ENTER>", &ColorRGBA(255, 255, 255, 255))?
                 .at(align::top(360).center(640)),
         })
     }

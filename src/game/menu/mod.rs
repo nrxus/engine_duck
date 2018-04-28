@@ -1,13 +1,13 @@
 mod gui;
 
-pub use self::gui::Quit;
 use self::gui::Gui;
+pub use self::gui::Quit;
 use {asset, Result};
 
-use moho::{self, input};
 use moho::font::Font;
-use moho::texture::{Image, Texture};
 use moho::renderer::{align, ColorRGBA};
+use moho::texture::{Image, Texture};
+use moho::{self, input};
 
 #[derive(Default)]
 pub struct Menu {
@@ -30,10 +30,7 @@ pub struct Assets<T> {
 }
 
 impl<T: Texture> Assets<T> {
-    pub fn load<AM>(menu: &Menu, asset_manager: &mut AM) -> Result<Self>
-    where
-        AM: asset::Manager<Texture = T>,
-    {
+    pub fn load(menu: &Menu, asset_manager: &mut impl asset::Manager<Texture = T>) -> Result<Self> {
         let husky = {
             let pos = align::right(640 - 32 - 30).middle(125);
             asset_manager.image(asset::Texture::Husky, pos)?.scale(2)

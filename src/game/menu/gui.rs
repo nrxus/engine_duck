@@ -2,10 +2,10 @@ pub use self::button::Kind as Quit;
 use Result;
 
 use glm;
-use moho::{self, input};
 use moho::font::Font;
-use moho::texture::Texture;
 use moho::renderer::{align, options, Draw, Renderer, Show};
+use moho::texture::Texture;
+use moho::{self, input};
 use sdl2::keyboard::Keycode;
 
 pub struct Gui {
@@ -44,10 +44,7 @@ pub struct Assets<T> {
 }
 
 impl<T> Assets<T> {
-    pub fn load<F>(font: &F, picker: T, gui: &Gui) -> Result<Self>
-    where
-        F: Font<Texture = T>,
-    {
+    pub fn load(font: &impl Font<Texture = T>, picker: T, gui: &Gui) -> Result<Self> {
         let new_game = {
             let center = glm::ivec2(640, 325);
             let text = "New Game";
@@ -115,14 +112,13 @@ mod button {
     }
 
     impl<T> Assets<T> {
-        pub fn load<F>(text: &str, font: &F, center: glm::IVec2) -> Result<Self>
-        where
-            F: Font<Texture = T>,
-        {
+        pub fn load(text: &str, font: &impl Font<Texture = T>, center: glm::IVec2) -> Result<Self> {
             let dims = font.measure(text)?;
-            let idle = font.texturize(text, &ColorRGBA(255, 255, 255, 255))
+            let idle = font
+                .texturize(text, &ColorRGBA(255, 255, 255, 255))
                 .map(Rc::new)?;
-            let selected = font.texturize(text, &ColorRGBA(255, 255, 0, 255))
+            let selected = font
+                .texturize(text, &ColorRGBA(255, 255, 0, 255))
                 .map(Rc::new)?;
             let dst = align::middle(center.y).center(center.x).dims(dims);
             Ok(Assets {

@@ -9,35 +9,27 @@ mod score_repository;
 mod screen;
 mod text;
 
-use self::screen::Screen;
 use self::helper::Helper;
+use self::screen::Screen;
 use {asset, data, Result};
 
-use moho::{self, input};
-use moho::engine::{self, Engine, NextScene};
 use moho::engine::step::fixed;
+use moho::engine::{self, Engine, NextScene};
 use moho::font::Font;
 use moho::renderer::{self, ColorRGBA, Draw, Renderer};
 use moho::texture::{self, Texture};
+use moho::{self, input};
 
-use std::time::Duration;
 use std::rc::Rc;
+use std::time::Duration;
 
 type State<W> = moho::State<W, <W as engine::World>::Quit>;
 
-pub fn run<'t, 'f, E, C, FL, TL, T>(
-    engine: &mut Engine<E, C, fixed::FixedUpdate>,
-    texture_loader: &'t TL,
-    font_loader: &'f FL,
-) -> Result<()>
-where
-    T: Texture + Draw<C>,
-    E: input::EventPump,
-    C: renderer::Canvas,
-    FL: moho::font::Loader<'f>,
-    FL::Font: moho::font::Font<Texture = Rc<T>>,
-    TL: texture::Loader<'t, Texture = T>,
-{
+pub fn run<'t, 'f, C: renderer::Canvas, T: Texture + Draw<C>>(
+    engine: &mut Engine<impl input::EventPump, C, fixed::FixedUpdate>,
+    texture_loader: &'t impl texture::Loader<'t, Texture = T>,
+    font_loader: &'f impl moho::font::Loader<'f, Font = impl moho::font::Font<Texture = Rc<T>>>,
+) -> Result<()> {
     let font_manager = moho::font::Manager::new(font_loader);
     let texture_manager = texture::Manager::new(texture_loader);
     let data = data::Game::load("media/game_data.yaml")?;
@@ -96,10 +88,10 @@ pub struct Assets<T, F> {
 }
 
 impl<T: Texture + Clone, F: Font<Texture = T>> Assets<T, F> {
-    fn load<AM>(world: &World, helper: &mut AM) -> Result<Self>
-    where
-        AM: asset::Manager<Texture = T, Font = F>,
-    {
+    fn load(
+        world: &World,
+        helper: &mut impl asset::Manager<Texture = T, Font = F>,
+    ) -> Result<Self> {
         screen::Assets::load(&world.screen, helper).map(|screen| Assets { screen })
     }
 }

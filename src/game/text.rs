@@ -5,8 +5,8 @@ use moho::font::Font;
 use moho::renderer::{self, ColorRGBA, Draw, Renderer, Show};
 use moho::texture::Texture;
 
-use std::rc::Rc;
 use std::fmt::Debug;
+use std::rc::Rc;
 
 struct CacheValue<T>(T);
 pub trait Cached {
@@ -30,10 +30,11 @@ pub struct Text<T, F, V: Cached> {
 impl<T, F: Font<Texture = T>, V: Cached + Debug> Text<T, F, V> {
     const COLOR: ColorRGBA = ColorRGBA(255, 255, 0, 255);
 
-    pub fn load<P>(value: V, font: Rc<F>, pattern: P) -> Result<Self>
-    where
-        P: Fn(V::Value) -> String + 'static,
-    {
+    pub fn load(
+        value: V,
+        font: Rc<F>,
+        pattern: impl Fn(V::Value) -> String + 'static,
+    ) -> Result<Self> {
         let text = pattern(value.cached());
         let texture = font.texturize(&text, &Self::COLOR)?;
         Ok(Text {

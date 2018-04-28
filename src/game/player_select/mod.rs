@@ -7,10 +7,10 @@ use self::guide::Guide;
 use data::Animators;
 use {asset, Result};
 
-use moho::{self, input};
 use moho::font::Font;
-use moho::texture::{Image, Texture};
 use moho::renderer::{align, ColorRGBA};
+use moho::texture::{Image, Texture};
+use moho::{self, input};
 
 use std::time::Duration;
 
@@ -46,14 +46,12 @@ pub struct Assets<T> {
 }
 
 impl<T: Texture + Clone> Assets<T> {
-    pub fn load<AM>(asset_manager: &mut AM) -> Result<Self>
-    where
-        AM: asset::Manager<Texture = T>,
-    {
+    pub fn load(asset_manager: &mut impl asset::Manager<Texture = T>) -> Result<Self> {
         let color = ColorRGBA(255, 255, 0, 255);
 
         let font = asset_manager.font(asset::Font::KenPixel, 64)?;
-        let title = font.texturize("Select Player", &color)?
+        let title = font
+            .texturize("Select Player", &color)?
             .at(align::top(50).center(640));
 
         let guide = guide::Assets::load(&*font, asset_manager)?;

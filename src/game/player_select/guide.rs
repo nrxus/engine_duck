@@ -42,15 +42,15 @@ pub struct Assets<T> {
 }
 
 impl<T: Texture> Assets<T> {
-    pub fn load<F, AM>(font: &F, asset_manager: &mut AM) -> Result<Self>
-    where
-        F: Font<Texture = T>,
-        AM: asset::Manager<Texture = T>,
-    {
+    pub fn load(
+        font: &impl Font<Texture = T>,
+        asset_manager: &mut impl asset::Manager<Texture = T>,
+    ) -> Result<Self> {
         let color = ColorRGBA(255, 255, 0, 255);
 
         //Collect
-        let collect = font.texturize("Collect", &color)?
+        let collect = font
+            .texturize("Collect", &color)?
             .at(align::top(400).center(320));
         let distance = 50;
         let coin = {
@@ -63,7 +63,8 @@ impl<T: Texture> Assets<T> {
         };
 
         //Avoid
-        let avoid = font.texturize("Avoid", &color)?
+        let avoid = font
+            .texturize("Avoid", &color)?
             .at(align::top(400).center(960));
         let cat = {
             let pos = align::top(500).center(960);

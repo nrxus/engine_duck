@@ -1,6 +1,6 @@
 use asset::Sprite;
-use utils::InputStateExt;
 use utils::HKey as Direction;
+use utils::InputStateExt;
 
 use moho::animation::animator::{self, Animator};
 use moho::animation::TileSheet;

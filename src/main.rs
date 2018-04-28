@@ -7,10 +7,10 @@ extern crate sdl2;
 extern crate serde_derive;
 extern crate serde_yaml;
 
-mod data;
 mod asset;
-mod level_viewer;
+mod data;
 mod game;
+mod level_viewer;
 mod utils;
 
 use moho::engine::{step, Engine};
@@ -95,5 +95,6 @@ fn main() {
     } else {
         let font_loader = FontLoader::new(&texture_loader);
         game::run(&mut engine, &texture_loader, &font_loader)
-    }.unwrap()
+    }
+    .unwrap()
 }

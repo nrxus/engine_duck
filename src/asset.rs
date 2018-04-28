@@ -1,10 +1,10 @@
 use {data, Result};
 
 use moho::animation::TileSheet;
+use moho::font;
 use moho::renderer::options::{self, Options};
 use moho::renderer::{Destination, Draw, Position, Renderer, Show};
 use moho::texture::{self, Image};
-use moho::font;
 
 use std::rc::Rc;
 

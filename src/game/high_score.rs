@@ -1,9 +1,9 @@
 use {asset, Result};
 
-use moho::{self, input};
 use moho::font::Font;
-use moho::texture::{Image, Texture};
 use moho::renderer::{align, ColorRGBA};
+use moho::texture::{Image, Texture};
+use moho::{self, input};
 use sdl2::keyboard::Keycode;
 
 pub struct HighScore {}
@@ -26,10 +26,7 @@ pub struct Assets<T> {
 }
 
 impl<T: Texture> Assets<T> {
-    pub fn load<AM>(asset_manager: &mut AM) -> Result<Self>
-    where
-        AM: asset::Manager<Texture = T>,
-    {
+    pub fn load(asset_manager: &mut impl asset::Manager<Texture = T>) -> Result<Self> {
         let color = ColorRGBA(255, 255, 0, 255);
         let center = align::center(640);
 

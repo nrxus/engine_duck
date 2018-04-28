@@ -4,9 +4,9 @@ use Result;
 
 use moho::animation::animator::{self, Animator};
 use moho::animation::TileSheet;
-use moho::{self, input};
 use moho::renderer::{align, Draw, Renderer, Show};
 use moho::texture::{Image, Texture};
+use moho::{self, input};
 use sdl2::keyboard::Keycode;
 
 use std::time::Duration;
@@ -119,10 +119,7 @@ pub struct Assets<T> {
 }
 
 impl<T: Texture + Clone> Assets<T> {
-    pub fn load<AM>(asset_manager: &mut AM) -> Result<Self>
-    where
-        AM: asset::Manager<Texture = T>,
-    {
+    pub fn load(asset_manager: &mut impl asset::Manager<Texture = T>) -> Result<Self> {
         let distance = 50;
         let picker = asset_manager.texture(asset::Texture::Heart)?;
         let husky = {

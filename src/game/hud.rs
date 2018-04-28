@@ -1,13 +1,13 @@
-use {asset, Result};
 use game::text::{self, Text};
+use {asset, Result};
 
 use moho;
 use moho::font::Font;
 use moho::renderer::align;
 use moho::texture::{Image, Texture};
 
-use std::time::Duration;
 use std::rc::Rc;
+use std::time::Duration;
 
 pub struct Hud {
     timer: Duration,
@@ -66,10 +66,10 @@ impl<T, F: Font<Texture = T>> Assets<T, F> {
 }
 
 impl<T: Texture, F: Font<Texture = T>> Assets<T, F> {
-    pub fn load<AM>(world: &Hud, asset_manager: &mut AM) -> Result<Self>
-    where
-        AM: asset::Manager<Texture = T, Font = F>,
-    {
+    pub fn load(
+        world: &Hud,
+        asset_manager: &mut impl asset::Manager<Texture = T, Font = F>,
+    ) -> Result<Self> {
         let font = asset_manager.font(asset::Font::KenPixel, 32)?;
         Ok(Assets {
             timer: Text::load(world.timer, Rc::clone(&font), |v| format!("Time: {:03}", v))?
