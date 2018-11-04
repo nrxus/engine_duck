@@ -11,13 +11,13 @@ use moho::{
 
 use std::{fs::File, time::Duration};
 
-#[derive(Debug, serde_derive::Deserialize, Clone, Copy)]
+#[derive(Debug, serde::Deserialize, Clone, Copy)]
 pub struct Dimension {
     pub x: u32,
     pub y: u32,
 }
 
-#[derive(Debug, serde_derive::Deserialize, Clone)]
+#[derive(Debug, serde::Deserialize, Clone)]
 pub struct Animation {
     pub texture: Texture,
     pub frames: u32,
@@ -25,16 +25,16 @@ pub struct Animation {
     pub duration: u64,
 }
 
-#[derive(Debug, serde_derive::Deserialize, Clone)]
+#[derive(Debug, serde::Deserialize, Clone)]
 pub struct Texture(pub String);
 
-#[derive(Debug, serde_derive::Deserialize, Clone)]
+#[derive(Debug, serde::Deserialize, Clone)]
 pub enum Shape {
     Rectangle(Dimension, Dimension),
     Circle(Dimension, f64),
 }
 
-#[derive(Debug, serde_derive::Deserialize)]
+#[derive(Debug, serde::Deserialize)]
 pub struct Player {
     pub animation: Animation,
     pub idle_texture: Texture,
@@ -43,7 +43,7 @@ pub struct Player {
     pub legs: Vec<Shape>,
 }
 
-#[derive(Debug, serde_derive::Deserialize)]
+#[derive(Debug, serde::Deserialize)]
 pub struct Cat {
     pub idle: Animation,
     pub walking: Animation,
@@ -51,20 +51,20 @@ pub struct Cat {
     pub body: Vec<Shape>,
 }
 
-#[derive(Debug, serde_derive::Deserialize, Clone)]
+#[derive(Debug, serde::Deserialize, Clone)]
 pub struct Image {
     pub texture: Texture,
     pub out_size: Dimension,
 }
 
-#[derive(Debug, serde_derive::Deserialize)]
+#[derive(Debug, serde::Deserialize)]
 pub struct Collectable {
     pub animation: Animation,
     pub out_size: Dimension,
     pub score: u32,
 }
 
-#[derive(Debug, serde_derive::Deserialize)]
+#[derive(Debug, serde::Deserialize)]
 pub struct Ground {
     pub center: Texture,
     pub left: Texture,
@@ -75,7 +75,7 @@ pub struct Ground {
     pub out_size: Dimension,
 }
 
-#[derive(Debug, serde_derive::Deserialize)]
+#[derive(Debug, serde::Deserialize)]
 pub struct Game {
     pub duck: Player,
     pub husky: Player,

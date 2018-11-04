@@ -6,7 +6,7 @@ use std::fs::File;
 
 const PATH: &str = "media/high_scores.yaml";
 
-#[derive(Debug, serde_derive::Deserialize, serde_derive::Serialize, Clone)]
+#[derive(Debug, serde::Deserialize, serde::Serialize, Clone)]
 pub struct Score {
     pub points: u32,
     pub name: String,
