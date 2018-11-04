@@ -1,13 +1,17 @@
 mod gui;
 
-use self::gui::Gui;
 pub use self::gui::Quit;
-use {asset, Result};
 
-use moho::font::Font;
-use moho::renderer::{align, ColorRGBA};
-use moho::texture::{Image, Texture};
-use moho::{self, input};
+use self::gui::Gui;
+use crate::{asset, Result};
+
+use moho::{
+    self,
+    font::Font,
+    input,
+    renderer::{align, ColorRGBA},
+    texture::{Image, Texture},
+};
 
 #[derive(Default)]
 pub struct Menu {
@@ -20,7 +24,7 @@ impl Menu {
     }
 }
 
-#[derive(Show)]
+#[derive(moho::Show)]
 pub struct Assets<T> {
     husky: Image<T>,
     duck: Image<T>,

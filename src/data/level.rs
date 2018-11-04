@@ -1,35 +1,33 @@
 use super::Dimension;
-use Result;
-
-use serde_yaml;
+use crate::Result;
 
 use std::fs::File;
 
-#[derive(Debug, Deserialize, Clone, Copy)]
+#[derive(Debug, serde_derive::Deserialize, Clone, Copy)]
 pub enum GroundKind {
     Top,
     Middle,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, serde_derive::Deserialize)]
 pub enum CatKind {
     Idle,
     Moving(u32),
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, serde_derive::Deserialize)]
 pub struct Cat {
     pub kind: CatKind,
     pub bottom_left: Dimension,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, serde_derive::Deserialize)]
 pub struct Obstacle {
     pub count: Dimension,
     pub bottom_left: Dimension,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, serde_derive::Deserialize)]
 pub struct Spike {
     pub count: u32,
     pub bottom_left: Dimension,
@@ -41,7 +39,7 @@ pub struct Spike {
     pub bottom: Option<GroundKind>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, serde_derive::Deserialize)]
 pub struct Level {
     pub obstacles: Vec<Obstacle>,
     pub goal: Dimension,

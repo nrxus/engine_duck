@@ -1,16 +1,10 @@
 mod running;
 mod timeup;
 
-use self::running::Running;
-use self::timeup::TimeUp;
-use data::Animators;
-use game::player;
-use {asset, Result};
+use self::{running::Running, timeup::TimeUp};
+use crate::{asset, data::Animators, game::player, Result};
 
-use moho::engine::step::fixed;
-use moho::font::Font;
-use moho::texture::Texture;
-use moho::{self, input};
+use moho::{self, engine::step::fixed, font::Font, input, texture::Texture};
 
 use std::time::Duration;
 
@@ -36,7 +30,7 @@ impl GamePlay {
     }
 }
 
-#[derive(Show)]
+#[derive(moho::Show)]
 pub enum Assets<T, F> {
     Running(running::Assets<T, F>),
     TimeUp(timeup::Assets<T, F>),

@@ -1,13 +1,17 @@
-use game::text::{self, Text};
-use {asset, Result};
+use crate::{
+    asset,
+    game::text::{self, Text},
+    Result,
+};
 
-use moho;
-use moho::font::Font;
-use moho::renderer::align;
-use moho::texture::{Image, Texture};
+use moho::{
+    self,
+    font::Font,
+    renderer::align,
+    texture::{Image, Texture},
+};
 
-use std::rc::Rc;
-use std::time::Duration;
+use std::{rc::Rc, time::Duration};
 
 pub struct Hud {
     timer: Duration,
@@ -52,7 +56,7 @@ impl text::Cached for u32 {
     }
 }
 
-#[derive(Show)]
+#[derive(moho::Show)]
 pub struct Assets<T, F> {
     timer: Image<Text<T, F, Duration>>,
     score: Image<Text<T, F, u32>>,

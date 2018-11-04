@@ -9,19 +9,19 @@ mod score_repository;
 mod screen;
 mod text;
 
-use self::helper::Helper;
-use self::screen::Screen;
-use {asset, data, Result};
+use self::{helper::Helper, screen::Screen};
+use crate::{asset, data, Result};
 
-use moho::engine::step::fixed;
-use moho::engine::{self, Engine, NextScene};
-use moho::font::Font;
-use moho::renderer::{self, ColorRGBA, Draw, Renderer};
-use moho::texture::{self, Texture};
-use moho::{self, input};
+use moho::{
+    self,
+    engine::{self, step::fixed, Engine, NextScene},
+    font::Font,
+    input,
+    renderer::{self, ColorRGBA, Draw, Renderer},
+    texture::{self, Texture},
+};
 
-use std::rc::Rc;
-use std::time::Duration;
+use std::{rc::Rc, time::Duration};
 
 type State<W> = moho::State<W, <W as engine::World>::Quit>;
 

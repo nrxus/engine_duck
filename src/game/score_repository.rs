@@ -1,13 +1,12 @@
-use Result;
+use crate::Result;
 
 use failure::Error;
-use serde_yaml;
 
 use std::fs::File;
 
 const PATH: &str = "media/high_scores.yaml";
 
-#[derive(Debug, Deserialize, Serialize, Clone)]
+#[derive(Debug, serde_derive::Deserialize, serde_derive::Serialize, Clone)]
 pub struct Score {
     pub points: u32,
     pub name: String,

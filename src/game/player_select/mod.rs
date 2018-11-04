@@ -2,15 +2,17 @@ mod gui;
 mod guide;
 
 pub use self::gui::ButtonKind as PlayerKind;
-use self::gui::Gui;
-use self::guide::Guide;
-use data::Animators;
-use {asset, Result};
 
-use moho::font::Font;
-use moho::renderer::{align, ColorRGBA};
-use moho::texture::{Image, Texture};
-use moho::{self, input};
+use self::{gui::Gui, guide::Guide};
+use crate::{asset, data::Animators, Result};
+
+use moho::{
+    self,
+    font::Font,
+    input,
+    renderer::{align, ColorRGBA},
+    texture::{Image, Texture},
+};
 
 use std::time::Duration;
 
@@ -37,7 +39,7 @@ impl PlayerSelect {
     }
 }
 
-#[derive(Show)]
+#[derive(moho::Show)]
 pub struct Assets<T> {
     title: Image<T>,
     instructions: Image<T>,

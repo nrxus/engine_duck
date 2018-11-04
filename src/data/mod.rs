@@ -1,23 +1,23 @@
 mod level;
 
 pub use self::level::{CatKind, GroundKind, Level, Obstacle};
-use Result;
 
-use glm;
-use moho::animation::animator;
-use moho::renderer::{Destination, Position};
-use serde_yaml;
+use crate::Result;
 
-use std::fs::File;
-use std::time::Duration;
+use moho::{
+    animation::animator,
+    renderer::{Destination, Position},
+};
 
-#[derive(Debug, Deserialize, Clone, Copy)]
+use std::{fs::File, time::Duration};
+
+#[derive(Debug, serde_derive::Deserialize, Clone, Copy)]
 pub struct Dimension {
     pub x: u32,
     pub y: u32,
 }
 
-#[derive(Debug, Deserialize, Clone)]
+#[derive(Debug, serde_derive::Deserialize, Clone)]
 pub struct Animation {
     pub texture: Texture,
     pub frames: u32,
@@ -25,16 +25,16 @@ pub struct Animation {
     pub duration: u64,
 }
 
-#[derive(Debug, Deserialize, Clone)]
+#[derive(Debug, serde_derive::Deserialize, Clone)]
 pub struct Texture(pub String);
 
-#[derive(Debug, Deserialize, Clone)]
+#[derive(Debug, serde_derive::Deserialize, Clone)]
 pub enum Shape {
     Rectangle(Dimension, Dimension),
     Circle(Dimension, f64),
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, serde_derive::Deserialize)]
 pub struct Player {
     pub animation: Animation,
     pub idle_texture: Texture,
@@ -43,7 +43,7 @@ pub struct Player {
     pub legs: Vec<Shape>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, serde_derive::Deserialize)]
 pub struct Cat {
     pub idle: Animation,
     pub walking: Animation,
@@ -51,20 +51,20 @@ pub struct Cat {
     pub body: Vec<Shape>,
 }
 
-#[derive(Debug, Deserialize, Clone)]
+#[derive(Debug, serde_derive::Deserialize, Clone)]
 pub struct Image {
     pub texture: Texture,
     pub out_size: Dimension,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, serde_derive::Deserialize)]
 pub struct Collectable {
     pub animation: Animation,
     pub out_size: Dimension,
     pub score: u32,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, serde_derive::Deserialize)]
 pub struct Ground {
     pub center: Texture,
     pub left: Texture,
@@ -75,7 +75,7 @@ pub struct Ground {
     pub out_size: Dimension,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, serde_derive::Deserialize)]
 pub struct Game {
     pub duck: Player,
     pub husky: Player,

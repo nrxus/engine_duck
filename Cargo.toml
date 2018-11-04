@@ -2,17 +2,18 @@
 name = "engine_duck"
 version = "0.1.0"
 authors = ["Andres <andresnrx@gmail.com>"]
+edition = "2018"
 
 [[bin]]
 name = "duck_husky_wedding"
 path = "src/main.rs"
 
 [dependencies]
-failure = ">=0.1.1"
-glm = ">=0.2.3"
-serde = ">=1.0.2"
-serde_yaml = ">=0.7"
-serde_derive = ">=1.0.2"
+failure = "0.1"
+glm = "0.2"
+serde = "1.0"
+serde_yaml = "0.8"
+serde_derive = "1.0"
 
 [dependencies.moho]
 git = "https://github.com/nrxus/moho"

@@ -1,11 +1,13 @@
 use super::running;
-use {asset, Result};
+use crate::{asset, Result};
 
-use glm;
-use moho::font::Font;
-use moho::renderer::{align, ColorRGBA, Draw, Renderer, Show};
-use moho::texture::{Image, Texture};
-use moho::{self, input};
+use moho::{
+    self,
+    font::Font,
+    input,
+    renderer::{align, ColorRGBA, Draw, Renderer, Show},
+    texture::{Image, Texture},
+};
 use sdl2::keyboard::Keycode;
 
 pub struct TimeUp {}

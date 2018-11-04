@@ -1,12 +1,18 @@
-use asset::{self, Sprite};
-use data::Animators;
-use Result;
+use crate::{
+    asset::{self, Sprite},
+    data::Animators,
+    Result,
+};
 
-use moho::animation::animator::{self, Animator};
-use moho::animation::TileSheet;
-use moho::renderer::{align, Draw, Renderer, Show};
-use moho::texture::{Image, Texture};
-use moho::{self, input};
+use moho::{
+    animation::{
+        animator::{self, Animator},
+        TileSheet,
+    },
+    input,
+    renderer::{align, Draw, Renderer, Show},
+    texture::{Image, Texture},
+};
 use sdl2::keyboard::Keycode;
 
 use std::time::Duration;
@@ -112,7 +118,7 @@ impl<T: Texture> Button<T> {
     }
 }
 
-#[derive(Show)]
+#[derive(moho::Show)]
 pub struct Assets<T> {
     duck: Button<T>,
     husky: Button<T>,
@@ -124,13 +130,13 @@ impl<T: Texture + Clone> Assets<T> {
         let picker = asset_manager.texture(asset::Texture::Heart)?;
         let husky = {
             let pos = align::right(640 - distance / 2).bottom(300);
-            let mut image = asset_manager.image(asset::Texture::Husky, pos)?.scale(2);
+            let image = asset_manager.image(asset::Texture::Husky, pos)?.scale(2);
             let sheet = asset_manager.sheet(asset::Animation::Husky)?;
             Button::Idle(image, sheet, picker.clone())
         };
         let duck = {
             let pos = align::left(640 + distance / 2).bottom(300);
-            let mut image = asset_manager.image(asset::Texture::Duck, pos)?.scale(2);
+            let image = asset_manager.image(asset::Texture::Duck, pos)?.scale(2);
             let sheet = asset_manager.sheet(asset::Animation::Duck)?;
             Button::Idle(image, sheet, picker)
         };

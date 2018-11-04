@@ -1,12 +1,12 @@
-use Result;
+use crate::Result;
 
-use glm;
-use moho::font::Font;
-use moho::renderer::{self, ColorRGBA, Draw, Renderer, Show};
-use moho::texture::Texture;
+use moho::{
+    font::Font,
+    renderer::{self, ColorRGBA, Draw, Renderer, Show},
+    texture::Texture,
+};
 
-use std::fmt::Debug;
-use std::rc::Rc;
+use std::{fmt::Debug, rc::Rc};
 
 struct CacheValue<T>(T);
 pub trait Cached {
@@ -23,7 +23,7 @@ impl<T: Cached> PartialEq for CacheValue<T> {
 pub struct Text<T, F, V: Cached> {
     value: CacheValue<V>,
     texture: T,
-    pattern: Box<Fn(V::Value) -> String>,
+    pattern: Box<dyn Fn(V::Value) -> String>,
     font: Rc<F>,
 }
 

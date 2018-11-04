@@ -1,15 +1,15 @@
 mod action;
 
 pub use self::action::Action;
-use asset;
-use data::Animators;
-pub use game::player_select::PlayerKind as Kind;
-use utils::HKey as Direction;
-use Result;
+pub use crate::game::player_select::PlayerKind as Kind;
 
-use moho::input;
-use moho::renderer::{align, options, Draw, Renderer, Show};
-use moho::texture::Texture;
+use crate::{asset, data::Animators, utils::HKey as Direction, Result};
+
+use moho::{
+    input,
+    renderer::{align, options, Draw, Renderer, Show},
+    texture::Texture,
+};
 
 use std::time::Duration;
 

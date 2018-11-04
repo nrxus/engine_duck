@@ -1,17 +1,16 @@
-use asset::{self, Animation, Font, Sprite, Texture};
-use {data, Result};
+use crate::{
+    asset::{self, Animation, Font, Sprite, Texture},
+    data, Result,
+};
 
-use moho::animation::TileSheet;
-use moho::renderer::Position;
-use moho::texture::Image;
-use moho::{font, texture};
+use moho::{animation::TileSheet, font, renderer::Position, texture, texture::Image};
 
 use std::rc::Rc;
 
 pub struct Helper<'t, 'f, TL, FL>
 where
-    TL: texture::Loader<'t> + 't,
-    FL: font::Loader<'f> + 'f,
+    TL: texture::Loader<'t>,
+    FL: font::Loader<'f>,
 {
     pub texture_manager: texture::Manager<'t, TL>,
     pub font_manager: font::Manager<'f, FL>,
@@ -22,7 +21,7 @@ impl<'t, 'f, TL, FL> asset::Manager for Helper<'t, 'f, TL, FL>
 where
     TL: texture::Loader<'t>,
     TL::Texture: texture::Texture,
-    FL: font::Loader<'f> + 'f,
+    FL: font::Loader<'f>,
     FL::Font: font::Font<Texture = Rc<TL::Texture>>,
 {
     type Texture = Rc<TL::Texture>;

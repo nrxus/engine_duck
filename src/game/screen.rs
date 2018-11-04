@@ -1,13 +1,13 @@
-use game::game_play::{self, GamePlay};
-use game::high_score::{self, HighScore};
-use game::menu::{self, Menu};
-use game::player_select::{self, PlayerSelect};
-use {asset, Result};
+use crate::game::{
+    asset,
+    game_play::{self, GamePlay},
+    high_score::{self, HighScore},
+    menu::{self, Menu},
+    player_select::{self, PlayerSelect},
+    Result,
+};
 
-use moho::engine::step::fixed;
-use moho::font::Font;
-use moho::texture::Texture;
-use moho::{self, input};
+use moho::{self, engine::step::fixed, font::Font, input, texture::Texture};
 
 use std::time::Duration;
 
@@ -49,7 +49,7 @@ pub enum Screen {
     GamePlay(GamePlay),
 }
 
-#[derive(Show)]
+#[derive(moho::Show)]
 pub enum Assets<T, F> {
     Menu(menu::Assets<T>),
     HighScore(high_score::Assets<T>),

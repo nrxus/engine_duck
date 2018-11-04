@@ -1,11 +1,13 @@
 pub use self::button::Kind as Quit;
-use Result;
+use crate::Result;
 
-use glm;
-use moho::font::Font;
-use moho::renderer::{align, options, Draw, Renderer, Show};
-use moho::texture::Texture;
-use moho::{self, input};
+use moho::{
+    self,
+    font::Font,
+    input,
+    renderer::{align, options, Draw, Renderer, Show},
+    texture::Texture,
+};
 use sdl2::keyboard::Keycode;
 
 pub struct Gui {
@@ -91,11 +93,12 @@ impl<R: Renderer, T: Draw<R> + Texture> Show<R> for Assets<T> {
 }
 
 mod button {
-    use Result;
+    use crate::Result;
 
-    use glm;
-    use moho::font::Font;
-    use moho::renderer::{align, ColorRGBA, Destination};
+    use moho::{
+        font::Font,
+        renderer::{align, ColorRGBA, Destination},
+    };
 
     use std::rc::Rc;
 

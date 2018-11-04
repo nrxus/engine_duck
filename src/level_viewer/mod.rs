@@ -1,9 +1,10 @@
-use Result;
+use crate::Result;
 
-use moho::engine::step::fixed;
-use moho::engine::{self, Engine, NextScene};
-use moho::renderer;
-use moho::{self, input};
+use moho::{
+    self,
+    engine::{self, step::fixed, Engine, NextScene},
+    input, renderer,
+};
 
 use std::time::Duration;
 
@@ -28,7 +29,7 @@ impl engine::World for World {
 
 pub struct Helper {}
 
-#[derive(Show)]
+#[derive(moho::Show)]
 pub struct Assets {}
 
 impl NextScene<World, fixed::State, Helper> for Assets {

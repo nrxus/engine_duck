@@ -1,11 +1,13 @@
-use asset::Sprite;
-use utils::HKey as Direction;
-use utils::InputStateExt;
+use crate::{asset::Sprite, utils::HKey as Direction, utils::InputStateExt};
 
-use moho::animation::animator::{self, Animator};
-use moho::animation::TileSheet;
-use moho::input;
-use moho::texture::Image;
+use moho::{
+    animation::{
+        animator::{self, Animator},
+        TileSheet,
+    },
+    input,
+    texture::Image,
+};
 use sdl2::keyboard::Keycode;
 
 use std::time::Duration;

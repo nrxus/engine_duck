@@ -1,9 +1,12 @@
-use {asset, Result};
+use crate::{asset, Result};
 
-use moho::font::Font;
-use moho::renderer::{align, ColorRGBA};
-use moho::texture::{Image, Texture};
-use moho::{self, input};
+use moho::{
+    self,
+    font::Font,
+    input,
+    renderer::{align, ColorRGBA},
+    texture::{Image, Texture},
+};
 use sdl2::keyboard::Keycode;
 
 pub struct HighScore {}
@@ -18,7 +21,7 @@ impl HighScore {
     }
 }
 
-#[derive(Show)]
+#[derive(moho::Show)]
 pub struct Assets<T> {
     title: Image<T>,
     instructions: Image<T>,

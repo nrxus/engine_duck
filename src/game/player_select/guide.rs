@@ -1,11 +1,15 @@
-use asset::{self, Sprite};
-use data::Animators;
-use Result;
+use crate::{
+    asset::{self, Sprite},
+    data::Animators,
+    Result,
+};
 
-use moho::animation::animator::Animator;
-use moho::font::Font;
-use moho::renderer::{align, ColorRGBA};
-use moho::texture::{Image, Texture};
+use moho::{
+    animation::animator::Animator,
+    font::Font,
+    renderer::{align, ColorRGBA},
+    texture::{Image, Texture},
+};
 
 use std::time::Duration;
 
@@ -32,7 +36,7 @@ impl Guide {
     }
 }
 
-#[derive(Show)]
+#[derive(moho::Show)]
 pub struct Assets<T> {
     collect: Image<T>,
     avoid: Image<T>,

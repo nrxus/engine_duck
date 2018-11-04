@@ -1,10 +1,14 @@
-use {data, Result};
+use crate::{data, Result};
 
-use moho::animation::TileSheet;
-use moho::font;
-use moho::renderer::options::{self, Options};
-use moho::renderer::{Destination, Draw, Position, Renderer, Show};
-use moho::texture::{self, Image};
+use moho::{
+    animation::TileSheet,
+    font,
+    renderer::{
+        options::{self, Options},
+        Destination, Draw, Position, Renderer, Show,
+    },
+    texture::{self, Image},
+};
 
 use std::rc::Rc;
 

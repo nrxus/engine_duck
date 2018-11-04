@@ -1,12 +1,14 @@
-use data::Animators;
-use game::hud::{self, Hud};
-use game::player::{self, Player};
-use {asset, Result};
+use crate::{
+    asset,
+    data::Animators,
+    game::{
+        hud::{self, Hud},
+        player::{self, Player},
+    },
+    Result,
+};
 
-use moho::engine::step::fixed;
-use moho::font::Font;
-use moho::texture::Texture;
-use moho::{self, input};
+use moho::{self, engine::step::fixed, font::Font, input, texture::Texture};
 
 use std::time::Duration;
 
@@ -33,7 +35,7 @@ impl Running {
     }
 }
 
-#[derive(Show)]
+#[derive(moho::Show)]
 pub struct Assets<T, F> {
     hud: hud::Assets<T, F>,
     player: player::Assets<T>,
